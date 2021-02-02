@@ -1,0 +1,322 @@
+// Copyright 2020 ONDEWO GmbH
+// Licensed under the ONDEWO GmbH license, Version 1.0 (the "License");
+// you must not use this file except in compliance with the License.
+// You must obtain a copy of the License at
+// office@ondewo.com
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+syntax = "proto3";
+
+package ondewo.survey;
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+/////// Services ///////
+
+service Surveys {
+    // Create an agent for the given Survey message and persist the Survey message to KnowledgeBase
+    rpc CreateSurvey (CreateSurveyRequest) returns (Survey) {
+        option (google.api.http) = {
+            post: "/v2/survey"
+            body: "*"
+        };
+    }
+
+    // Retrieve a Survey message from the KnowledgeBase and return it
+    rpc GetSurvey (GetSurveyRequest) returns (Survey) {
+        option (google.api.http) = {
+            get: "/v2/survey/{survey_id=*}"
+        };
+    }
+
+    // Delete the agent for the given Survey and erase the Survey message from the Knowledge base
+    rpc DeleteSurvey (DeleteSurveyRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/v2/survey/{survey_id=*}"
+        };
+    }
+
+    // Retrieve answers to survey questions collected in interactions with a survey agent for a specific session
+    rpc GetSurveyAnswers (GetSurveyAnswersRequest) returns (SurveyAnswersResponse) {
+        option (google.api.http) = {
+            get: "/v2/survey/{survey_id=*}/answers/{session_id=*}"
+        };
+    }
+
+    // Retrieve all answers to survey questions collected in interactions with a survey agent in any session
+    rpc GetAllSurveyAnswers (GetAllSurveyAnswersRequest) returns (SurveyAnswersResponse) {
+        option (google.api.http) = {
+            get: "/v2/survey/{survey_id=*}/answers"
+        };
+    }
+}
+
+/////// Core Messages ///////
+
+message Survey {
+    // The project identifier for this survey. Equal to the parent of the corresponding Agent.
+    // Format: `projects/<Project ID>/agent`.
+    // Read-only in the Survey message (assigned by the back-end)
+    string survey_id = 1;
+
+    // Required. The (human readable) name of this survey
+    string display_name = 2;
+
+    // Required. The language of the agent created for the survey.
+    // This is also the only supported language of the agent.
+    string language_code = 3; // ISO 639-1 language code
+
+    // Required. List of questions to be asked during the survey.
+    repeated Question questions = 7;
+
+    // Required. Information about the entity behind the survey, the purpose of the survey, legal stuff, etc.
+    SurveyInfo survey_info = 8;
+
+    // Optional. List of subflows excluded for this survey.
+    repeated SubFlow exclude_subflows = 9;
+
+    // Note: All other attributes of the Agent message should be updated using the std mechanism of UpdateAgent
+    //  once the survey has been created.
+}
+
+// Collect information about the entity behind the survey, the purpose of the survey, legal stuff, etc.
+// This is needed to generate meaningful messages and training data for some of the auto-generated intents.
+message SurveyInfo {
+
+    // Required unless SubFlow.LEGAL_ENTITY is deselected.
+    // The legal entity (company, research institute, etc.) on whose behalf the survey is performed
+    string legal_entity = 1;
+
+    // Required unless SubFlow.POSTAL_ADDRESS is deselected.
+    // The postal address to which callees can direct any requests.
+    string postal_address = 2;
+
+    // Required unless SubFlow.EMAIL_ADDRESS is deselected.
+    // The email address to which callees can direct any requests.
+    string email_address = 3;
+
+    // Required unless SubFlow.PHONE_NUMBER is deselected.
+    // The phone number to which callees can direct any requests.
+    string phone_number = 4;
+
+    // Required unless SubFlow.PHONE_HOURS is deselected.
+    // The phone hours during which callees can call (in pronounceable form).
+    string phone_hours = 5;
+
+    // Required unless SubFlow.EXPECTED_DURATION is deselected.
+    // The expected duration of the survey (in pronounceable form)
+    string expected_duration = 6;
+
+    // Required unless SubFlow.PURPOSE is deselected.
+    // An explanation regarding the purpose of the survey (in pronounceable form)
+    string purpose = 7;
+
+    // Required.
+    // A one-word explanation of the survey topic (in pronounceable form)
+    string topic = 8;
+
+    // Required.
+    // A pronounceable explanation of the legal implications of participating in the survey.
+    // For example:
+    //  "Your answers during this survey will be stored anonymously for the next two years and then deleted."
+    // Should be formulated such that the agent can afterwards ask for the consent of the user.
+    // Example for how the agent could continue: "Are you willing to participate in this survey?"
+    string legal_disclaimer = 9;
+
+}
+
+
+// Enumeration of (some of) the subflows which are created by default
+// This can be used to "switch off" particular subflows when creating an agent during CreateSurvey
+// Subflows are defined as one of the following:
+// - sequences of intents A -> B_1, ..., B_n -> ... -> Z_1, ..., Z_m which are linked by context relationships
+//      such that the first intent in the sequence can always be triggered
+// - single intents which can always be triggered
+enum SubFlow {
+    // Not specified. This value should be never used.
+    SUBFLOW_UNSPECIFIED = 0;
+
+    // The subflow allowing the user to inquire whether s/he is talking to a bot
+    BOT = 1;
+
+    // The subflow allowing the user to inquire about the legal entity
+    LEGAL_ENTITY = 2;
+
+    // The subflow allowing the user to inquire about the postal address
+    POSTAL_ADDRESS = 3;
+
+    // The subflow allowing the user to inquire about the email address
+    EMAIL_ADDRESS = 4;
+
+    // The subflow allowing the user to inquire about the phone number
+    PHONE_NUMBER = 5;
+
+    // The subflow allowing the user to inquire about the phone hours
+    PHONE_HOURS = 6;
+
+    // The subflow allowing the user to inquire about the expected duration of the survey
+    EXPECTED_DURATION = 7;
+
+    // The subflow allowing the user to inquire about the purpose of the survey
+    PURPOSE = 8;
+
+}
+
+message Question {
+    oneof question {
+        OpenQuestion open_question = 1;
+        SingleChoiceQuestion single_choice_question = 2;
+        MultipleChoiceQuestion multiple_choice_question = 3;
+        ScaleQuestion scale_question = 4; // convenience wrapper around a SingleChoiceQuestion
+        SingleParameterQuestion single_parameter_question = 5;
+        MultipleParameterQuestion multiple_parameter_question = 6;
+    }
+}
+
+
+// A question to which any kind of reply can be given and recorded
+// fixme: not working yet
+message OpenQuestion {
+    // The text which introduces the question (should be pronounceable)
+    string question_text = 1;
+}
+
+// A question for which exactly one out of a predefined set of options is expected as answer
+// Example: SingleChoiceQuestion(
+//      question_text='Who is your favorite movie hero?',
+//      choices=[
+//          Choice(synonyms=['Bond', 'James Bond']),
+//          Choice(synonyms=['Batman']),
+//          Choice(synonyms=['Superman', 'Clark Kent']),
+//          ]
+//      )
+message SingleChoiceQuestion {
+    // The text which introduces the question (should be pronounceable)
+    string question_text = 1;
+
+    // List of choices which are accepted for this question
+    // Each Choice is represented by lists of synonyms.
+    // Note: needs to contain at least 2 choices
+    repeated Choice choices = 2;
+}
+
+// A question for which exactly one or more out of a predefined set of options are expected as answers
+// Example: MultipleChoiceQuestion(
+//      question_text='Which colors do you like?',
+//      choices=[
+//          Choice(synonyms=['red', 'reddisch']),
+//          Choice(synonyms=['blue', 'blueish']),
+//          Choice(synonyms=['yellow']),
+//          ]
+//       )
+message MultipleChoiceQuestion {
+    // The text which introduces the question (should be pronounceable)
+    string question_text = 1;
+
+    // List of choices which are accepted for this question
+    // Each Choice is represented by lists of synonyms.
+    // Note: needs to contain at least 2 choices
+    repeated Choice choices = 2;
+}
+
+// A question for which an answer on a user-defined scale is expected
+message ScaleQuestion {
+    message ScaleValue {
+        int32 value = 1;
+        string label = 2;
+    }
+    // The text which introduces the question (should be pronounceable)
+    string question_text = 1;
+    ScaleValue min_value = 2;
+    ScaleValue max_value = 3;
+}
+
+// SingleParameterQuestion defines a question which prompts the user for one entity of a particular type
+// Example: SingleParameterQuestion(question_text='How old are you?', parameter_type='sys.number')
+message SingleParameterQuestion {
+    // The text which introduces the question (should be pronounceable)
+    string question_text = 1;
+
+    // The display name of the entity (type) which is accepted as an answer to this question
+    // Note: the corresponding entity_type must exist (system entity type) and is not automatically created
+    string parameter_type = 2;
+}
+
+// MultipleParameterQuestion defines a question which prompts the user for one or several entities of one particular type
+// Example: MultipleParameterQuestion(question_text='How old are your children?', parameter_type='sys.number')
+message MultipleParameterQuestion {
+    // The text which introduces the question (should be pronounceable)
+    string question_text = 1;
+
+    // The display name of the entity (type) which is accepted as an answer to this question
+    // Note: the corresponding entity_type must exist (system entity type) and is not automatically created
+    string parameter_type = 2;
+}
+
+// The Choice message defines one "option" for the SingleChoiceQuestion and MultipleChoiceQuestion question types
+// Example: Choice(synonyms=["blue", "blueish", "pale blue", "deep blue"])
+message Choice {
+    // The synonyms which are recognized as equivalent for identifying one option
+    // Note: The first synonym is treated as the "canonical value" (i.e. the entity value)
+    repeated string synonyms = 1;
+
+    // Optional; Nested question if this specific choice gets chosen.
+    // Note: the follow-up question is only available for the SingleChoiceQuestion
+    Question follow_up_question = 2;
+}
+
+message Answer {
+    // the number of the question to which this answer belongs
+    int64 question_nr = 1;
+
+    // the ID of the session on which the answer was collected
+    string session_id = 2;
+
+    // Required; the full answer text
+    string answer_text = 3;
+
+    // fixme: better names and doc-strings below
+    // Optional; if the question involves a choice between different options: the normalized value for the selected option
+    string answer_parameter = 4;
+
+    // Optional; if the question involves a choice between different options: the original text for the selected option
+    string answer_parameter_original = 5;
+}
+
+
+/////// Request / Response messages ///////
+
+message GetSurveyRequest {
+    // The project identifier for this survey. Equal to the parent of the corresponding Agent.
+    // Format: `projects/<Project ID>/agent`.
+    string survey_id = 1;
+}
+
+message DeleteSurveyRequest {
+    // The project identifier for this survey. Equal to the parent of the corresponding Agent.
+    // Format: `projects/<Project ID>/agent`.
+    string survey_id = 1;
+}
+
+message GetSurveyAnswersRequest {
+    string session_id = 1; // id of one specific session on which survey answers were collected (contains survey_id)
+}
+
+message GetAllSurveyAnswersRequest {
+    // The project identifier for this survey. Equal to the parent of the corresponding Agent.
+    // Format: `projects/<Project ID>/agent`.
+    string survey_id = 1;
+}
+
+message CreateSurveyRequest {
+    Survey survey = 1;
+}
+
+message SurveyAnswersResponse {
+    Survey survey = 1;
+    repeated Answer answers = 2; // all the answers  for a given session id
+}
