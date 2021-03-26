@@ -264,12 +264,14 @@ message MultipleParameterQuestion {
 // Example: Choice(synonyms=["blue", "blueish", "pale blue", "deep blue"])
 message Choice {
     // The synonyms which are recognized as equivalent for identifying one option
-    // Note: The first synonym is treated as the "canonical value" (i.e. the entity value)
     repeated string synonyms = 1;
 
     // Optional; Nested question if this specific choice gets chosen.
     // Note: the follow-up question is only available for the SingleChoiceQuestion
     Question follow_up_question = 2;
+
+    // The "canonical value" (i.e. the entity value)
+    string value = 3;
 }
 
 message Answer {
