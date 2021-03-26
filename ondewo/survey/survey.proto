@@ -292,6 +292,10 @@ message Answer {
 
 /////// Request / Response messages ///////
 
+message CreateSurveyRequest {
+    Survey survey = 1;
+}
+
 message GetSurveyRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: `projects/<Project ID>/agent`.
@@ -312,10 +316,6 @@ message GetAllSurveyAnswersRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: `projects/<Project ID>/agent`.
     string survey_id = 1;
-}
-
-message CreateSurveyRequest {
-    Survey survey = 1;
 }
 
 message SurveyAnswersResponse {
