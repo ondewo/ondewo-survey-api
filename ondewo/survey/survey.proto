@@ -17,6 +17,7 @@ package ondewo.survey;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 
 /////// Services ///////
 
@@ -33,6 +34,14 @@ service Surveys {
     rpc GetSurvey (GetSurveyRequest) returns (Survey) {
         option (google.api.http) = {
             get: "/v2/survey/{survey_id=*}"
+        };
+    }
+
+    // Update an existing Survey message from the KnowledgeBase and return it
+    rpc UpdateSurvey (UpdateSurveyRequest) returns (Survey) {
+        option (google.api.http) = {
+            patch: "/v2/survey/{survey_id=*}"
+            body: "*"
         };
     }
 
@@ -303,6 +312,16 @@ message GetSurveyRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: `projects/<Project ID>/agent`.
     string survey_id = 1;
+}
+
+message UpdateSurveyRequest {
+    // Updated survey. Note: the ID must refer to an existing survey which will be updated
+    Survey survey = 1;
+
+    // Optional. Field mask that defines which fields get updated. Default: all fields are updated.
+    // Example:
+    //          - update_mask = FieldMask( [ 'survey.display_name', 'survey.questions' ] )
+    google.protobuf.FieldMask update_mask = 2;
 }
 
 message DeleteSurveyRequest {
