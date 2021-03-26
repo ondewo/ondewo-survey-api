@@ -11,11 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License. (editesyntax = "proto3";
+syntax = "proto3";
 
 package ondewo.survey;
 
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 
 /////// Services ///////
 
@@ -32,6 +34,14 @@ service Surveys {
     rpc GetSurvey (GetSurveyRequest) returns (Survey) {
         option (google.api.http) = {
             get: "/v2/survey/{survey_id=*}"
+        };
+    }
+
+    // Update an existing Survey message from the KnowledgeBase and return it
+    rpc UpdateSurvey (UpdateSurveyRequest) returns (Survey) {
+        option (google.api.http) = {
+            patch: "/v2/survey/{survey_id=*}"
+            body: "*"
         };
     }
 
@@ -263,12 +273,14 @@ message MultipleParameterQuestion {
 // Example: Choice(synonyms=["blue", "blueish", "pale blue", "deep blue"])
 message Choice {
     // The synonyms which are recognized as equivalent for identifying one option
-    // Note: The first synonym is treated as the "canonical value" (i.e. the entity value)
     repeated string synonyms = 1;
 
     // Optional; Nested question if this specific choice gets chosen.
     // Note: the follow-up question is only available for the SingleChoiceQuestion
     Question follow_up_question = 2;
+
+    // The "canonical value" (i.e. the entity value)
+    string value = 3;
 }
 
 message Answer {
@@ -292,10 +304,24 @@ message Answer {
 
 /////// Request / Response messages ///////
 
+message CreateSurveyRequest {
+    Survey survey = 1;
+}
+
 message GetSurveyRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: `projects/<Project ID>/agent`.
     string survey_id = 1;
+}
+
+message UpdateSurveyRequest {
+    // Updated survey. Note: the ID must refer to an existing survey which will be updated
+    Survey survey = 1;
+
+    // Optional. Field mask that defines which fields get updated. Default: all fields are updated.
+    // Example:
+    //          - update_mask = FieldMask( [ 'survey.display_name', 'survey.questions' ] )
+    google.protobuf.FieldMask update_mask = 2;
 }
 
 message DeleteSurveyRequest {
@@ -312,10 +338,6 @@ message GetAllSurveyAnswersRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: `projects/<Project ID>/agent`.
     string survey_id = 1;
-}
-
-message CreateSurveyRequest {
-    Survey survey = 1;
 }
 
 message SurveyAnswersResponse {
