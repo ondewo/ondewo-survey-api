@@ -1,7 +1,15 @@
 # Release History
 *****************
 
-## Release ONDEWO APIS 0.3.0
+## Release ONDEWO Survey Server API 0.4.0
+
+### Improvements
+
+ * [[OND214-5]](https://ondewo.atlassian.net/browse/OND214-5) - CRUD support for Surveys
+ * [[OND214-6]](https://ondewo.atlassian.net/browse/OND214-6) - Adapt to new API definition of NLU 3.x.x
+
+
+## Release ONDEWO Survey Server API 0.3.0
 
 ### New Features
  * Survey. Add update survey endpoint with field mask support
@@ -13,19 +21,19 @@
  * Set protobuf syntax to proto 3
 
 *****************
-## Release ONDEWO APIS 0.2.2
+## Release ONDEWO Survey Server API 0.2.2
 
 ### Improvements
  * Updated README
 
 *****************
-## Release ONDEWO APIS 0.2.1
+## Release ONDEWO Survey Server API 0.2.1
 
 ### Bug fixes
  * Updated licenses.
 
 *****************
-## Release ONDEWO APIS 0.2.0
+## Release ONDEWO Survey Server API 0.2.0
 
 ### New Features
 

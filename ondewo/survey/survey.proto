@@ -22,47 +22,77 @@ import "google/protobuf/field_mask.proto";
 /////// Services ///////
 
 service Surveys {
-    // Create an agent for the given Survey message and persist the Survey message to KnowledgeBase
+    // Create a Survey and an empty NLU Agent for it
     rpc CreateSurvey (CreateSurveyRequest) returns (Survey) {
         option (google.api.http) = {
-            post: "/v2/survey"
+            post: "/survey"
             body: "*"
         };
     }
 
-    // Retrieve a Survey message from the KnowledgeBase and return it
+    // Retrieve a Survey message from the Database and return it
     rpc GetSurvey (GetSurveyRequest) returns (Survey) {
         option (google.api.http) = {
-            get: "/v2/survey/{survey_id=*}"
+            get: "/survey/{survey_id=*}"
         };
     }
 
-    // Update an existing Survey message from the KnowledgeBase and return it
+    // Update an existing Survey message from the Database and return it
     rpc UpdateSurvey (UpdateSurveyRequest) returns (Survey) {
         option (google.api.http) = {
-            patch: "/v2/survey/{survey_id=*}"
+            patch: "/survey/{survey_id=*}"
             body: "*"
         };
     }
 
-    // Delete the agent for the given Survey and erase the Survey message from the Knowledge base
+    // Delete a survey and its associated agent (if existent)
     rpc DeleteSurvey (DeleteSurveyRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
-            delete: "/v2/survey/{survey_id=*}"
+            delete: "/survey/{survey_id=*}"
+        };
+    }
+
+    // Returns the list of all surveys in the server
+    rpc ListSurveys (ListSurveysRequest) returns (ListSurveysResponse) {
+        option (google.api.http) = {
+            get: "/surveys"
         };
     }
 
     // Retrieve answers to survey questions collected in interactions with a survey agent for a specific session
     rpc GetSurveyAnswers (GetSurveyAnswersRequest) returns (SurveyAnswersResponse) {
         option (google.api.http) = {
-            get: "/v2/survey/{survey_id=*}/answers/{session_id=*}"
+            get: "/survey/{survey_id=*}/answers/{session_id=*}"
         };
     }
 
     // Retrieve all answers to survey questions collected in interactions with a survey agent in any session
     rpc GetAllSurveyAnswers (GetAllSurveyAnswersRequest) returns (SurveyAnswersResponse) {
         option (google.api.http) = {
-            get: "/v2/survey/{survey_id=*}/answers"
+            get: "/survey/{survey_id=*}/answers"
+        };
+    }
+
+    // Populate and configures an NLU Agent from a Survey
+    rpc CreateAgentSurvey (AgentSurveyRequest) returns (AgentSurveyResponse) {
+        option (google.api.http) = {
+            post: "/survey/{survey_id=*}/agent"
+            body: "*"
+        };
+    }
+
+    // Update an NLU agent from a survey
+    rpc UpdateAgentSurvey (AgentSurveyRequest) returns (AgentSurveyResponse) {
+        option (google.api.http) = {
+            patch: "/survey/{survey_id=*}/agent"
+            body: "*"
+        };
+    }
+
+    // Deletes all data of an NLU agent associated to a survey
+    rpc DeleteAgentSurvey (AgentSurveyRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+            delete: "/survey/{survey_id=*}/agent/delete"
         };
     }
 }
@@ -294,10 +324,10 @@ message Answer {
     string answer_text = 3;
 
     // fixme: better names and doc-strings below
-    // Optional; if the question involves a choice between different options: the normalized value for the selected option
+    // Optional; contains the normalized value of the selected option (parameter) extracted
     string answer_parameter = 4;
 
-    // Optional; if the question involves a choice between different options: the original text for the selected option
+    // Optional; contains the original text of the selected option (parameter) extracted
     string answer_parameter_original = 5;
 }
 
@@ -331,7 +361,8 @@ message DeleteSurveyRequest {
 }
 
 message GetSurveyAnswersRequest {
-    string session_id = 1; // id of one specific session on which survey answers were collected (contains survey_id)
+    // ID of one specific session on which survey answers were collected (contains survey_id)
+    string session_id = 1;
 }
 
 message GetAllSurveyAnswersRequest {
@@ -341,6 +372,40 @@ message GetAllSurveyAnswersRequest {
 }
 
 message SurveyAnswersResponse {
-    Survey survey = 1;
+    // The project identifier for this survey. Equal to the parent of the corresponding Agent.
+    // Format: `projects/<Project ID>/agent`.
+    string survey_id = 1;
     repeated Answer answers = 2; // all the answers  for a given session id
+}
+
+message ListSurveysRequest {
+    // Optional. The next_page_token value returned from a previous list request.
+    // Example:
+    //      "current_index-10--page_size-20"
+    //      Start page -> 10
+    //      Page size -> 20
+    string page_token = 1;
+}
+
+// The response message for [Intents.ListIntents][google.cloud.dialogflow.v2.Intents.ListIntents].
+message ListSurveysResponse {
+    // The list of surveys. There will be a maximum number of items
+    // returned based on the page_token field in the request.
+    repeated Survey surveys = 1;
+
+    // Token to retrieve the next page of results, or empty if there are no
+    // more results in the list.
+    string next_page_token = 2;
+}
+
+message AgentSurveyRequest {
+    // The project identifier for this survey. Equal to the parent of the corresponding Agent.
+    // Format: `projects/<Project ID>/agent`.
+    string survey_id = 1;
+}
+
+message AgentSurveyResponse {
+    // The parent of an agent. Equal to the survey ID.
+    // Format: `projects/<Project ID>/agent`.
+    string parent = 1;
 }
