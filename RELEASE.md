@@ -1,6 +1,11 @@
 # Release History
 *****************
 
+## Release ONDEWO Survey Server API 0.4.1
+
+### Bug Fixes
+ * [[OND214-7]](https://ondewo.atlassian.net/browse/OND214-7) - Add missing google proto dependencies 
+
 ## Release ONDEWO Survey Server API 0.4.0
 
 ### Improvements
