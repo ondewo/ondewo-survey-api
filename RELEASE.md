@@ -1,6 +1,13 @@
 # Release History
 *****************
 
+## Release ONDEWO Survey Server API 0.5.0
+
+### Improvements
+
+ * [[OND214-14]](https://ondewo.atlassian.net/browse/OND214-13) - Add Survey Status
+ * [[OND214-13]](https://ondewo.atlassian.net/browse/OND214-13) - Add user information to the extracted answers
+
 ## Release ONDEWO Survey Server API 0.4.1
 
 ### Bug Fixes
