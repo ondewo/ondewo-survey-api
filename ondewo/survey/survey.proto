@@ -124,15 +124,15 @@ message Survey {
     // Note: All other attributes of the Agent message should be updated using the std mechanism of UpdateAgent
     //  once the survey has been created.
 
-    enum SurveyStatus {
+    enum AgentStatus {
         TO_BE_INITIALIZED = 0;
         UPDATED = 1;
         UPDATING = 2;
         OUTDATED = 3;
     }
 
-    // Current status of the survey
-    SurveyStatus status = 10;
+    // Current status of the NLU Agent respecting to the Survey
+    AgentStatus status = 10;
 }
 
 // Collect information about the entity behind the survey, the purpose of the survey, legal stuff, etc.
