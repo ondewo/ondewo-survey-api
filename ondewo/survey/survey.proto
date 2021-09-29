@@ -123,6 +123,16 @@ message Survey {
 
     // Note: All other attributes of the Agent message should be updated using the std mechanism of UpdateAgent
     //  once the survey has been created.
+
+    enum AgentStatus {
+        TO_BE_INITIALIZED = 0;
+        UPDATED = 1;
+        UPDATING = 2;
+        OUTDATED = 3;
+    }
+
+    // Current status of the NLU Agent respecting to the Survey
+    AgentStatus status = 10;
 }
 
 // Collect information about the entity behind the survey, the purpose of the survey, legal stuff, etc.
@@ -168,6 +178,11 @@ message SurveyInfo {
     // Should be formulated such that the agent can afterwards ask for the consent of the user.
     // Example for how the agent could continue: "Are you willing to participate in this survey?"
     string legal_disclaimer = 9;
+
+    // Optional.
+    // Defaults to False. Allows the definition of a survey as anonymous or not.
+    // If the survey is not anonymous, the name of the people as well as their number will be recorded
+    bool anonymous = 10;
 
 }
 
@@ -329,6 +344,21 @@ message Answer {
 
     // Optional; contains the original text of the selected option (parameter) extracted
     string answer_parameter_original = 5;
+
+    message UserInfo {
+        string first_name = 1;
+
+        string last_name = 2;
+
+        string phone_number = 3;
+
+        string session_id = 4;
+    }
+
+    oneof is_anonymous {
+        bool anonymous = 7;
+        UserInfo user_information = 6;
+    }
 }
 
 
