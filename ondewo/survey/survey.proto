@@ -346,13 +346,16 @@ message Answer {
     string answer_parameter_original = 5;
 
     message UserInfo {
+        // First name of the User to be surveyed
         string first_name = 1;
-
+        // Last name of the User to be surveyed
         string last_name = 2;
-
+        // Phone number of the User to be surveyed
         string phone_number = 3;
-
+        // the ID of the session on which the answer was collected
         string session_id = 4;
+        // Unique identifier of the User to be surveyed
+        string user_id = 5;
     }
 
     oneof is_anonymous {
@@ -391,8 +394,16 @@ message DeleteSurveyRequest {
 }
 
 message GetSurveyAnswersRequest {
-    // ID of one specific session on which survey answers were collected (contains survey_id)
-    string session_id = 1;
+    string survey_id = 1;
+
+    oneof identifier {
+        // ID of one specific session on which survey answers were collected (contains survey_id)
+        string session_id = 2;
+        // User Identifier. Note, if the survey is anonymous there will no identifier to filter on
+        string user_id = 3;
+        // User phone number. Note, if the survey is anonymous there will no identifier to filter on
+        string user_phone_number = 4;
+    }
 }
 
 message GetAllSurveyAnswersRequest {
