@@ -405,7 +405,7 @@ message SurveyAnswersResponse {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: `projects/<Project ID>/agent`.
     string survey_id = 1;
-    repeated Answer answers = 2; // all the answers  for a given session id
+    repeated Answer answers = 2; // all requested answers
 }
 
 message ListSurveysRequest {
