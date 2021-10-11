@@ -26,24 +26,24 @@ import "google/protobuf/struct.proto";
 // The following servicer was designed to support the FHIR standard.
 // Both Questionnaires and Responses will be detected and transformed for a simpler usage.
 
-service Surveys {
+service FHIR {
     // Create a Survey from FHIR format and an empty NLU Agent for it
     rpc CreateFHIRSurvey (CreateFHIRSurveyRequest) returns (Survey) {
         option (google.api.http) = {
-            post: "/survey"
+            post: "/fhir_survey"
             body: "*"
         };
     }
     // Create a Survey from FHIR format and an empty NLU Agent for it
     rpc GetFHIRSurveyAnswers (GetSurveyAnswersRequest) returns (SurveyFHIRAnswersResponse) {
         option (google.api.http) = {
-            get: "/survey/{survey_id=*}/answers/{session_id=*}"
+            get: "/survey/{survey_id=*}/fhir_answers/{session_id=*}"
         };
     }
     // Create a Survey from FHIR format and an empty NLU Agent for it
     rpc GetAllFHIRSurveyAnswers (GetAllSurveyAnswersRequest) returns (SurveyFHIRAnswersResponse) {
         option (google.api.http) = {
-            get: "/survey/{survey_id=*}/answers"
+            get: "/survey/{survey_id=*}/fhir_answers"
         };
     }
 }
