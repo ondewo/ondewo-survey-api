@@ -6,10 +6,12 @@
 ### New Features
 
  * [[OND214-24]](https://ondewo.atlassian.net/browse/OND214-24) - Addition of the FHIR compatibility servicer
+ * [[OND214-24]](https://ondewo.atlassian.net/browse/OND214-24) - Addition of the User Identifier to the UserInformation message
+ * [[OND214-24]](https://ondewo.atlassian.net/browse/OND214-24) - Additional filters on GetSurveyAnswersRequest: "user_id" and "phone_number"
 
 *****************
 ## Release ONDEWO Survey Server API 0.5.0
-
+~~~~
 ### Improvements
 
  * [[OND214-14]](https://ondewo.atlassian.net/browse/OND214-14) - Add Agent Status
