@@ -17,8 +17,6 @@ package ondewo.survey;
 
 import "google/api/annotations.proto";
 import "ondewo/survey/survey.proto";
-import "google/protobuf/empty.proto";
-import "google/protobuf/field_mask.proto";
 import "google/protobuf/struct.proto";
 
 /////// FHIR Services ///////
