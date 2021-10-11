@@ -11,7 +11,7 @@
 
 *****************
 ## Release ONDEWO Survey Server API 0.5.0
-~~~~
+
 ### Improvements
 
  * [[OND214-14]](https://ondewo.atlassian.net/browse/OND214-14) - Add Agent Status
