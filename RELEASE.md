@@ -1,18 +1,29 @@
 # Release History
 *****************
 
+## Release ONDEWO Survey Server API 0.6.0
+
+### New Features
+
+ * [[OND214-24]](https://ondewo.atlassian.net/browse/OND214-24) - Addition of the FHIR compatibility servicer
+ * [[OND214-24]](https://ondewo.atlassian.net/browse/OND214-24) - Addition of the User Identifier to the UserInformation message
+ * [[OND214-24]](https://ondewo.atlassian.net/browse/OND214-24) - Additional filters on GetSurveyAnswersRequest: "user_id" and "phone_number"
+
+*****************
 ## Release ONDEWO Survey Server API 0.5.0
 
 ### Improvements
 
- * [[OND214-14]](https://ondewo.atlassian.net/browse/OND214-13) - Add Agent Status
+ * [[OND214-14]](https://ondewo.atlassian.net/browse/OND214-14) - Add Agent Status
  * [[OND214-13]](https://ondewo.atlassian.net/browse/OND214-13) - Add user information to the extracted answers
 
+*****************
 ## Release ONDEWO Survey Server API 0.4.1
 
 ### Bug Fixes
  * [[OND214-7]](https://ondewo.atlassian.net/browse/OND214-7) - Add missing google proto dependencies 
 
+*****************
 ## Release ONDEWO Survey Server API 0.4.0
 
 ### Improvements
@@ -20,7 +31,7 @@
  * [[OND214-5]](https://ondewo.atlassian.net/browse/OND214-5) - CRUD support for Surveys
  * [[OND214-6]](https://ondewo.atlassian.net/browse/OND214-6) - Adapt to new API definition of NLU 3.x.x
 
-
+*****************
 ## Release ONDEWO Survey Server API 0.3.0
 
 ### New Features
