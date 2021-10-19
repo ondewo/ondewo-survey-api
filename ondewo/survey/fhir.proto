@@ -32,13 +32,13 @@ service FHIR {
             body: "*"
         };
     }
-    // Create a Survey from FHIR format and an empty NLU Agent for it
+    // Get Survey Answers on FHIR format
     rpc GetFHIRSurveyAnswers (GetSurveyAnswersRequest) returns (SurveyFHIRAnswersResponse) {
         option (google.api.http) = {
             get: "/survey/{survey_id=*}/fhir_answers/{session_id=*}"
         };
     }
-    // Create a Survey from FHIR format and an empty NLU Agent for it
+    // Get all Survey Answers on FHIR format
     rpc GetAllFHIRSurveyAnswers (GetAllSurveyAnswersRequest) returns (SurveyFHIRAnswersResponse) {
         option (google.api.http) = {
             get: "/survey/{survey_id=*}/fhir_answers"
