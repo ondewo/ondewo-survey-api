@@ -1,7 +1,7 @@
 # Release History
 *****************
 
-## Release ONDEWO Survey Server API 0.7.0
+## Release ONDEWO Survey Server API 1.0.0
 
 ### Improvements
 

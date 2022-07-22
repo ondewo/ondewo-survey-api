@@ -12,7 +12,7 @@ export
 
 # MUST BE THE SAME AS API in Mayor and Minor Version Number
 # example: API 2.9.0 --> Client 2.9.X
-ONDEWO_SURVEY_API_VERSION=0.7.0
+ONDEWO_SURVEY_API_VERSION=1.0.0
 
 
 # You need to setup an access token at https://github.com/settings/tokens - permissions are important
