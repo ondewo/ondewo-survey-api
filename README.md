@@ -85,3 +85,9 @@ The   ``` make ondewo_release``` command can be divided into 5 steps:
 The variable for the GitHub Access Token is inside the Makefile,
 but the value is overwritten during ``` make ondewo_release```, because
 it is passed from the devops-accounts repo as an argument to the actual ```release``` command.
+
+Proto Documentation
+-------------------
+
+Documentation for the .proto files is generated automatically when there is a pullrequest or push
+to master. It is located in the branch [gh-pages]("https://github.com/ondewo/ondewo-survey-api/tree/gh-pages").
