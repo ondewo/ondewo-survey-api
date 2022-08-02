@@ -90,4 +90,4 @@ Proto Documentation
 -------------------
 
 Documentation for the .proto files is generated automatically when there is a pullrequest or push
-to master. It is located in the branch [gh-pages]("https://github.com/ondewo/ondewo-survey-api/tree/gh-pages").
+to master. It is located in the branch [gh-pages](https://github.com/ondewo/ondewo-survey-api/tree/gh-pages).

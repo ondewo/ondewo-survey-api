@@ -5,7 +5,7 @@
 
 ### Improvements
 
- * [[OND211-2039]](https://ondewo.atlassian.net/browse/OND211-2039) - added precommit hooks and adjusted files to them
+ * [[OND211-2039]](https://ondewo.atlassian.net/browse/OND211-2039) - added pre-commit hooks and adjusted files to them
 
 *****************
 

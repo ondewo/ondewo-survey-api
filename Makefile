@@ -46,9 +46,6 @@ install_precommit_hooks: ## Installs pre-commit hooks and sets them up for the o
 precommit_hooks_run_all_files: ## Runs all pre-commit hooks on all files and not just the changed ones
 	pre-commit run --all-file
 
-flake8:
-	flake8
-
 help: ## Print usage info about help targets
 	# (first comment after target starting with double hashes ##)
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-40s\033[0m %s\n", $$1, $$2}'
