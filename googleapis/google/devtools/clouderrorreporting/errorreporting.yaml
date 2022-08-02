@@ -5,7 +5,7 @@ name: clouderrorreporting.googleapis.com
 
 documentation:
   summary: >-
-    
+
     Stackdriver Error Reporting groups and counts similar errors
     from cloud services.
     The Stackdriver Error Reporting API provides a way to report new errors and

@@ -51,13 +51,13 @@ API client libraries can be built directly from files in this repo using [the pr
 Automatic Release Process
 ------------------
 The entire process is automated to make development easier. The actual steps are simple:
- 
+
 TODOs in Pull Request before the release:
- 
+
  - Update the Version number inside the Makefile
    - ! : Major and Minor Version Number must be the same for Client and API at all times
       >example: API 2.9.0 --> Client 2.9.X
- 
+
  - Check if RELEASE.md is up-to-date
 
 TODOs after Pull Request was merged in:
@@ -75,13 +75,13 @@ TODOs after Pull Request was merged in:
     make ondewo_release
     ```
 
-The   ``` make ondewo_release``` command can be divided into 5 steps: 
+The   ``` make ondewo_release``` command can be divided into 5 steps:
 
 - cloning the devops-accounts repository and extracting the credentials
 - creating and pushing the release branch
 - creating and pushing the release tag
 - creating the GitHub release
 
-The variable for the GitHub Access Token is inside the Makefile, 
+The variable for the GitHub Access Token is inside the Makefile,
 but the value is overwritten during ``` make ondewo_release```, because
 it is passed from the devops-accounts repo as an argument to the actual ```release``` command.
