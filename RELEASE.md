@@ -1,6 +1,14 @@
 # Release History
 *****************
 
+## Release ONDEWO Survey Server API 2.0.0
+
+### Improvements
+
+ * Synchronize API Client Versions
+
+*****************
+
 ## Release ONDEWO Survey Server API 1.1.0
 
 ### Improvements
