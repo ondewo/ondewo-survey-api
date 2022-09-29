@@ -36,7 +36,14 @@ IMAGE_UTILS_NAME=ondewo-survey-api-utils:${ONDEWO_SURVEY_API_VERSION}
 #       ONDEWO Standard Make Targets
 ########################################################
 
-setup_developer_environment_locally: install_precommit_hooks
+setup_developer_environment_locally: install_precommit_hooks install_nvm ## Sets up local development enviorenment !! Forcefully closes current terminal
+
+install_nvm: ## Install NVM, node and npm !! Forcefully closes current terminal
+	@curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+	@sh install_nvm.sh
+	$(eval PID:=$(shell ps -ft $(ps | tail -1 | cut -c 8-13) | head -2 | tail -1 | cut -c 1-8))
+	@node --version & npm --version || (kill -KILL ${PID})
+
 
 install_precommit_hooks: ## Installs pre-commit hooks and sets them up for the ondewo-survey-api repo
 	pip install pre-commit
