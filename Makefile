@@ -71,7 +71,16 @@ TEST:
 	@echo ${GITHUB_GH_TOKEN}
 	@echo ${CURRENT_RELEASE_NOTES}
 
-githubio_logic:
+githubio_logic_pre:
+	$(eval REPO_NAME:= $(shell echo ${GH_REPO} | cut -d "-" -f 2 ))
+	$(eval REPO_NAME_UPPER:= $(shell echo ${GH_REPO} | cut -d "-" -f 2 | sed -e 's/\(.*\)/\U\1/'))
+	$(eval DOCS_DIR:=ondewo.github.io/docs/ondewo-${REPO_NAME}-api/${ONDEWO_SURVEY_API_VERSION})
+	@rm -rf ${DOCS_DIR}
+	@mkdir "${DOCS_DIR}"
+	@cp docs/* ${DOCS_DIR}
+	@sed -i "s/h1>Protocol Documentation/h1>${REPO_NAME_UPPER} ${ONDEWO_SURVEY_API_VERSION} Documentation/" ${DOCS_DIR}/index.html
+
+githubio_logic: | githubio_logic_pre
 	$(eval REPO_NAME:= $(shell echo ${GH_REPO} | cut -d "-" -f 2 ))
 	$(eval REPO_NAME_UPPER:= $(shell echo ${GH_REPO} | cut -d "-" -f 2 | sed -e 's/\(.*\)/\U\1/'))
 	@git branch | grep "*" | grep -q "master" || (echo "Not on master branch"  & rm -rf ondewo.github.io && exit 1)
@@ -80,22 +89,17 @@ githubio_logic:
 	$(eval TEMP_TEXT:= $(shell cat ondewo.github.io/script_object.txt | sed -e "s/VERSION/${ONDEWO_SURVEY_API_VERSION}/g" -e "s/TECHNOLOGY/${REPO_NAME}/g"))
 	@sed -i "${VERSION_LINE} i ${TEMP_TEXT}" ondewo.github.io/data.js
 	@cd ondewo.github.io && npx prettier -w --single-quote data.js
-
 	$(eval DOCS_DIR:=ondewo.github.io/docs/ondewo-${REPO_NAME}-api/${ONDEWO_SURVEY_API_VERSION})
 	@rm -rf ${DOCS_DIR}
 	@mkdir "${DOCS_DIR}"
 	@cp docs/* ${DOCS_DIR}
 	@sed -i "s/h1>Protocol Documentation/h1>${REPO_NAME_UPPER} ${ONDEWO_SURVEY_API_VERSION} Documentation/" ${DOCS_DIR}/index.html
-
 	$(eval HEADER_LINE:= $(shell cat ${DOCS_DIR}/index.html | grep -n "${REPO_NAME_UPPER} ${ONDEWO_SURVEY_API_VERSION} Documentation" | grep -o -E '[0-9]+' | head -1 | sed -e 's/^0\+//'))
 	$(eval TEMP_IMG:= $(shell cat  ondewo.github.io/script_image.txt))
-	$(eval TEMP_CALC:= $(shell expr ${HEADER_LINE} - 1))
-
+	$(eval TEMP_CALC:= $(shell expr ${HEADER_LINE} ))
 	sed -i '${TEMP_CALC} i ${TEMP_IMG}' ${DOCS_DIR}/index.html
-
 	head -30 ${DOCS_DIR}/index.html
 	cat ondewo.github.io/data.js | sed -n "/name\: '${REPO_NAME_UPPER}'/,/end\: ''/p"
-
 	@git -C ondewo.github.io status
 	@git -C ondewo.github.io add data.js
 	@git -C ondewo.github.io add docs
