@@ -60,6 +60,20 @@ install_precommit_hooks: ## Installs pre-commit hooks and sets them up for the o
 precommit_hooks_run_all_files: ## Runs all pre-commit hooks on all files and not just the changed ones
 	pre-commit run --all-file
 
+flake8: ## Runs flake8
+	flake8 --config .flake8 .
+
+mypy: ## Run mypy static code checking
+	@echo "---------------------------------------------"
+	@echo "START: Run mypy in pre-commit hook ..."
+	pre-commit run mypy --all-files
+	@echo "DONE: Run mypy in pre-commit hook."
+	@echo "---------------------------------------------"
+	@echo "START: Run mypy directly ..."
+	mypy --config-file=mypy.ini .
+	@echo "DONE: Run mypy directly"
+	@echo "---------------------------------------------"
+
 help: ## Print usage info about help targets
 	# (first comment after target starting with double hashes ##)
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-40s\033[0m %s\n", $$1, $$2}'
@@ -68,8 +82,8 @@ makefile_chapters: ## Shows all sections of Makefile
 	@echo `cat Makefile| grep "########################################################" -A 1 | grep -v "########################################################"`
 
 TEST:
-	@echo ${GITHUB_GH_TOKEN}
-	@echo ${CURRENT_RELEASE_NOTES}
+	@echo "----------------------------------------------\nGITHUB_GH_TOKEN\n----------------------------------------------\n{GITHUB_GH_TOKEN}\n"
+	@echo "----------------------------------------------\nCURRENT_RELEASE_NOTES\n----------------------------------------------\n${CURRENT_RELEASE_NOTES}\n"
 
 githubio_logic_pre:
 	$(eval REPO_NAME:= $(shell echo ${GH_REPO} | cut -d "-" -f 2 ))
@@ -108,7 +122,10 @@ githubio_logic: | githubio_logic_pre
 	@git -C ondewo.github.io push
 
 update_githubio:
-	@rm -rf ondewo.github.io
+	@if [ -d "ondewo.github.io" ]; then \
+		echo "Removing existing directory ondewo.github.io"; \
+		rm -rf ondewo.github.io; sleep 3s; \
+	fi
 	@git clone git@github.com:ondewo/ondewo.github.io.git
 	@make githubio_logic || (echo "Done")
 	@rm -rf ondewo.github.io
@@ -118,7 +135,7 @@ update_githubio:
 ########################################################
 #		Release
 
-release: create_release_branch create_release_tag build_and_release_to_github_via_docker  ## Automate the entire release process
+release: create_release_branch create_release_tag build_and_release_to_github_via_docker ## Automate the entire release process
 	@echo "Release Finished"
 
 create_release_branch: ## Create Release Branch and push it to origin
@@ -182,21 +199,21 @@ release_client:
 
 PYTHON_CLIENT="git@github.com:ondewo/ondewo-survey-client-python.git"
 
-release_python_client:
+release_python_client: ## Release Python Client
 	@echo "Start releasing Python Client"
 	make release_client GENERIC_CLIENT=${PYTHON_CLIENT} RELEASEMD="RELEASE.md"
 	@echo "End releasing Python Client \n \n \n"
 
 NODEJS_CLIENT="git@github.com:ondewo/ondewo-survey-client-nodejs.git"
 
-release_nodejs_client:
+release_nodejs_client: ## Release NodeJs Client
 	@echo "Start releasing Nodejs Client"
 	make release_client GENERIC_CLIENT=${NODEJS_CLIENT} RELEASEMD="src/RELEASE.md"
 	@echo "End releasing Nodejs Client \n \n \n"
 
 TYPESCRIPT_CLIENT="git@github.com:ondewo/ondewo-survey-client-typescript.git"
 
-release_typescript_client:
+release_typescript_client: ## Release Typescript Client
 	@echo "Start releasing Typescript Client"
 	make release_client GENERIC_CLIENT=${TYPESCRIPT_CLIENT} RELEASEMD="src/RELEASE.md"
 	@echo "End releasing Typescript Client \n \n \n"
@@ -210,7 +227,7 @@ release_angular_client:
 
 JS_CLIENT="git@github.com:ondewo/ondewo-survey-client-js.git"
 
-release_js_client:
+release_js_client: ## Release JS Client
 	@echo "Start releasing Js Client"
 	make release_client GENERIC_CLIENT=${JS_CLIENT} RELEASEMD="src/RELEASE.md"
 	@echo "End releasing Js Client \n \n \n"
@@ -218,15 +235,15 @@ release_js_client:
 ########################################################
 #		GITHUB
 
-build_and_release_to_github_via_docker: build_utils_docker_image release_to_github_via_docker_image  ## Release automation for building and releasing on GitHub via a docker image
+build_and_release_to_github_via_docker: build_utils_docker_image release_to_github_via_docker_image ## Release automation for building and releasing on GitHub via a docker image
 
-build_utils_docker_image:  ## Build utils docker image
+build_utils_docker_image: ## Build utils docker image
 	docker build -f Dockerfile.utils -t ${IMAGE_UTILS_NAME} .
 
-push_to_gh: login_to_gh build_gh_release
+push_to_gh: login_to_gh build_gh_release ## Logs into GitHub CLI and Releases
 	@echo 'Released to Github'
 
-release_to_github_via_docker_image:  ## Release to Github via docker
+release_to_github_via_docker_image: ## Release to Github via docker
 	docker run --rm \
 		-e GITHUB_GH_TOKEN=${GITHUB_GH_TOKEN} \
 		${IMAGE_UTILS_NAME} make push_to_gh
@@ -241,7 +258,7 @@ clone_devops_accounts: ## Clones devops-accounts repo
 	@if [ -d $(DEVOPS_ACCOUNT_GIT) ]; then rm -Rf $(DEVOPS_ACCOUNT_GIT); fi
 	git clone git@bitbucket.org:ondewo/${DEVOPS_ACCOUNT_GIT}.git
 
-run_release_with_devops:
+run_release_with_devops: ## Gets Credentials from devops-repo and runs release with them
 	$(eval info:= $(shell cat ${DEVOPS_ACCOUNT_DIR}/account_github.env | grep GITHUB_GH))
 	make release $(info)
 
