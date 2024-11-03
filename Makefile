@@ -1,5 +1,4 @@
 export
-
 # ---------------- BEFORE RELEASE ----------------
 # 1 - Update Version Number
 # 2 - Update RELEASE.md
@@ -18,7 +17,6 @@ export
 # MUST BE THE SAME AS API in Mayor and Minor Version Number
 # example: API 2.9.0 --> Client 2.9.X
 ONDEWO_SURVEY_API_VERSION=2.0.0
-
 
 # You need to setup an access token at https://github.com/settings/tokens - permissions are important
 GITHUB_GH_TOKEN?=ENTER_YOUR_TOKEN_HERE
@@ -166,7 +164,6 @@ GENERIC_RELEASE_NOTES="\n***************** \n\\\#\\\# Release ONDEWO Survey REPO
 	\n\\\#\\\#\\\# Improvements \n \
 	* Tracking API Version [${ONDEWO_SURVEY_API_VERSION}](https://github.com/ondewo/ondewo-survey-api/releases/tag/${ONDEWO_SURVEY_API_VERSION}) ( [Documentation](https://ondewo.github.io/ondewo-survey-api/) ) \n"
 
-
 release_client:
 	$(eval REPO_NAME:= $(shell echo ${GENERIC_CLIENT} | cut -d "-" -f 4 | cut -d '.' -f 1))
 	$(eval REPO_DIR:= $(shell echo "ondewo-survey-client-${REPO_NAME}"))
@@ -195,7 +192,6 @@ release_client:
 # Remove everything from Release
 	sudo rm -rf ${REPO_DIR}
 	rm -f temp-notes
-
 
 PYTHON_CLIENT="git@github.com:ondewo/ondewo-survey-client-python.git"
 
