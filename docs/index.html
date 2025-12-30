@@ -246,7 +246,7 @@
       <div class="file-heading">
         <h2 id="ondewo/survey/fhir.proto">ondewo/survey/fhir.proto</h2><a href="#top">Top</a>
       </div>
-      <p>Copyright 2020 ONDEWO GmbH</p><p>Licensed under the Apache License, Version 2.0 (the "License");</p><p>you may not use this file except in compliance with the License.</p><p>You may obtain a copy of the License at</p><p>http://www.apache.org/licenses/LICENSE-2.0</p><p>Unless required by applicable law or agreed to in writing, software</p><p>distributed under the License is distributed on an "AS IS" BASIS,</p><p>WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</p><p>See the License for the specific language governing permissions and</p><p>limitations under the License. (editesyntax = "proto3";</p>
+      <p>Copyright 2020 ONDEWO GmbH</p><p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at</p><p><a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p><p>Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License. (editesyntax = "proto3";</p>
 
       
       <div id="ondewo/survey/fhir.proto-services" class="object-category">Services</div>
@@ -262,19 +262,19 @@
 
           <pre>rpc CreateFHIRSurvey (<a href="#ondewo.survey.CreateFHIRSurveyRequest">CreateFHIRSurveyRequest</a>) returns (<a href="#ondewo.survey.Survey">Survey)</a></pre>
 
-          Create a Survey from FHIR format and an empty NLU Agent for it
+          <p>Create a Survey from FHIR format and an empty NLU Agent for it</p>
         
           <h4 id="ondewo.survey.FHIR.GetFHIRSurveyAnswers" class="title-badge method">GetFHIRSurveyAnswers</h4>
 
           <pre>rpc GetFHIRSurveyAnswers (<a href="#ondewo.survey.GetSurveyAnswersRequest">GetSurveyAnswersRequest</a>) returns (<a href="#ondewo.survey.SurveyFHIRAnswersResponse">SurveyFHIRAnswersResponse)</a></pre>
 
-          Get Survey Answers on FHIR format
+          <p>Get Survey Answers on FHIR format</p>
         
           <h4 id="ondewo.survey.FHIR.GetAllFHIRSurveyAnswers" class="title-badge method">GetAllFHIRSurveyAnswers</h4>
 
           <pre>rpc GetAllFHIRSurveyAnswers (<a href="#ondewo.survey.GetAllSurveyAnswersRequest">GetAllSurveyAnswersRequest</a>) returns (<a href="#ondewo.survey.SurveyFHIRAnswersResponse">SurveyFHIRAnswersResponse)</a></pre>
 
-          Get all Survey Answers on FHIR format
+          <p>Get all Survey Answers on FHIR format</p>
         
 
         
@@ -372,7 +372,7 @@
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>The project identifier for this survey. Equal to the parent of the corresponding Agent.
-Format: `projects/<Project ID>/agent`. </p></td>
+Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
                 </tr>
               
                 <tr>
@@ -400,7 +400,7 @@ Format: `projects/<Project ID>/agent`. </p></td>
       <div class="file-heading">
         <h2 id="ondewo/survey/survey.proto">ondewo/survey/survey.proto</h2><a href="#top">Top</a>
       </div>
-      <p>Copyright 2020 ONDEWO GmbH</p><p>Licensed under the Apache License, Version 2.0 (the "License");</p><p>you may not use this file except in compliance with the License.</p><p>You may obtain a copy of the License at</p><p>http://www.apache.org/licenses/LICENSE-2.0</p><p>Unless required by applicable law or agreed to in writing, software</p><p>distributed under the License is distributed on an "AS IS" BASIS,</p><p>WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</p><p>See the License for the specific language governing permissions and</p><p>limitations under the License. (editesyntax = "proto3";</p>
+      <p>Copyright 2020 ONDEWO GmbH</p><p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at</p><p><a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p><p>Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License. (editesyntax = "proto3";</p>
 
       
       <div id="ondewo/survey/survey.proto-services" class="object-category">Services</div>
@@ -416,61 +416,61 @@ Format: `projects/<Project ID>/agent`. </p></td>
 
           <pre>rpc CreateSurvey (<a href="#ondewo.survey.CreateSurveyRequest">CreateSurveyRequest</a>) returns (<a href="#ondewo.survey.Survey">Survey)</a></pre>
 
-          Create a Survey and an empty NLU Agent for it
+          <p>Create a Survey and an empty NLU Agent for it</p>
         
           <h4 id="ondewo.survey.Surveys.GetSurvey" class="title-badge method">GetSurvey</h4>
 
           <pre>rpc GetSurvey (<a href="#ondewo.survey.GetSurveyRequest">GetSurveyRequest</a>) returns (<a href="#ondewo.survey.Survey">Survey)</a></pre>
 
-          Retrieve a Survey message from the Database and return it
+          <p>Retrieve a Survey message from the Database and return it</p>
         
           <h4 id="ondewo.survey.Surveys.UpdateSurvey" class="title-badge method">UpdateSurvey</h4>
 
           <pre>rpc UpdateSurvey (<a href="#ondewo.survey.UpdateSurveyRequest">UpdateSurveyRequest</a>) returns (<a href="#ondewo.survey.Survey">Survey)</a></pre>
 
-          Update an existing Survey message from the Database and return it
+          <p>Update an existing Survey message from the Database and return it</p>
         
           <h4 id="ondewo.survey.Surveys.DeleteSurvey" class="title-badge method">DeleteSurvey</h4>
 
           <pre>rpc DeleteSurvey (<a href="#ondewo.survey.DeleteSurveyRequest">DeleteSurveyRequest</a>) returns (<a href="#google.protobuf.Empty">.google.protobuf.Empty)</a></pre>
 
-          Delete a survey and its associated agent (if existent)
+          <p>Delete a survey and its associated agent (if existent)</p>
         
           <h4 id="ondewo.survey.Surveys.ListSurveys" class="title-badge method">ListSurveys</h4>
 
           <pre>rpc ListSurveys (<a href="#ondewo.survey.ListSurveysRequest">ListSurveysRequest</a>) returns (<a href="#ondewo.survey.ListSurveysResponse">ListSurveysResponse)</a></pre>
 
-          Returns the list of all surveys in the server
+          <p>Returns the list of all surveys in the server</p>
         
           <h4 id="ondewo.survey.Surveys.GetSurveyAnswers" class="title-badge method">GetSurveyAnswers</h4>
 
           <pre>rpc GetSurveyAnswers (<a href="#ondewo.survey.GetSurveyAnswersRequest">GetSurveyAnswersRequest</a>) returns (<a href="#ondewo.survey.SurveyAnswersResponse">SurveyAnswersResponse)</a></pre>
 
-          Retrieve answers to survey questions collected in interactions with a survey agent for a specific session
+          <p>Retrieve answers to survey questions collected in interactions with a survey agent for a specific session</p>
         
           <h4 id="ondewo.survey.Surveys.GetAllSurveyAnswers" class="title-badge method">GetAllSurveyAnswers</h4>
 
           <pre>rpc GetAllSurveyAnswers (<a href="#ondewo.survey.GetAllSurveyAnswersRequest">GetAllSurveyAnswersRequest</a>) returns (<a href="#ondewo.survey.SurveyAnswersResponse">SurveyAnswersResponse)</a></pre>
 
-          Retrieve all answers to survey questions collected in interactions with a survey agent in any session
+          <p>Retrieve all answers to survey questions collected in interactions with a survey agent in any session</p>
         
           <h4 id="ondewo.survey.Surveys.CreateAgentSurvey" class="title-badge method">CreateAgentSurvey</h4>
 
           <pre>rpc CreateAgentSurvey (<a href="#ondewo.survey.AgentSurveyRequest">AgentSurveyRequest</a>) returns (<a href="#ondewo.survey.AgentSurveyResponse">AgentSurveyResponse)</a></pre>
 
-          Populate and configures an NLU Agent from a Survey
+          <p>Populate and configures an NLU Agent from a Survey</p>
         
           <h4 id="ondewo.survey.Surveys.UpdateAgentSurvey" class="title-badge method">UpdateAgentSurvey</h4>
 
           <pre>rpc UpdateAgentSurvey (<a href="#ondewo.survey.AgentSurveyRequest">AgentSurveyRequest</a>) returns (<a href="#ondewo.survey.AgentSurveyResponse">AgentSurveyResponse)</a></pre>
 
-          Update an NLU agent from a survey
+          <p>Update an NLU agent from a survey</p>
         
           <h4 id="ondewo.survey.Surveys.DeleteAgentSurvey" class="title-badge method">DeleteAgentSurvey</h4>
 
           <pre>rpc DeleteAgentSurvey (<a href="#ondewo.survey.AgentSurveyRequest">AgentSurveyRequest</a>) returns (<a href="#google.protobuf.Empty">.google.protobuf.Empty)</a></pre>
 
-          Deletes all data of an NLU agent associated to a survey
+          <p>Deletes all data of an NLU agent associated to a survey</p>
         
 
         
@@ -614,7 +614,7 @@ Format: `projects/<Project ID>/agent`. </p></td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>The project identifier for this survey. Equal to the parent of the corresponding Agent.
-Format: `projects/<Project ID>/agent`. </p></td>
+Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
                 </tr>
               
             </tbody>
@@ -639,7 +639,7 @@ Format: `projects/<Project ID>/agent`. </p></td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>The parent of an agent. Equal to the survey ID.
-Format: `projects/<Project ID>/agent`. </p></td>
+Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
                 </tr>
               
             </tbody>
@@ -769,7 +769,7 @@ Optional; contains the normalized value of the selected option (parameter) extra
         
       
         <h3 id="ondewo.survey.Choice" class="title-badge message">Choice</h3>
-        <p>The Choice message defines one "option" for the SingleChoiceQuestion and MultipleChoiceQuestion question types</p><p>Example: Choice(synonyms=["blue", "blueish", "pale blue", "deep blue"])</p>
+        <p><p>The Choice message defines one &quot;option&quot; for the SingleChoiceQuestion and MultipleChoiceQuestion question types</p></p><p><p>Example: <code>Choice(synonyms=[&quot;blue&quot;, &quot;blueish&quot;, &quot;pale blue&quot;, &quot;deep blue&quot;])</code></p></p>
 
         
           <table class="field-table">
@@ -797,7 +797,7 @@ Note: the follow-up question is only available for the SingleChoiceQuestion </p>
                   <td>value</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p>The "canonical value" (i.e. the entity value) </p></td>
+                  <td><p>The &quot;canonical value&quot; (i.e. the entity value) </p></td>
                 </tr>
               
             </tbody>
@@ -846,7 +846,7 @@ Note: the follow-up question is only available for the SingleChoiceQuestion </p>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>The project identifier for this survey. Equal to the parent of the corresponding Agent.
-Format: `projects/<Project ID>/agent`. </p></td>
+Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
                 </tr>
               
             </tbody>
@@ -871,7 +871,7 @@ Format: `projects/<Project ID>/agent`. </p></td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>The project identifier for this survey. Equal to the parent of the corresponding Agent.
-Format: `projects/<Project ID>/agent`. </p></td>
+Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
                 </tr>
               
             </tbody>
@@ -941,7 +941,7 @@ Format: `projects/<Project ID>/agent`. </p></td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>The project identifier for this survey. Equal to the parent of the corresponding Agent.
-Format: `projects/<Project ID>/agent`. </p></td>
+Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
                 </tr>
               
             </tbody>
@@ -967,9 +967,9 @@ Format: `projects/<Project ID>/agent`. </p></td>
                   <td></td>
                   <td><p>Optional. The next_page_token value returned from a previous list request.
 Example:
-     "current_index-10--page_size-20"
-     Start page -> 10
-     Page size -> 20 </p></td>
+<ul>
+  <li>&quot;current_index-10--page_size-20&quot; - Start page -&gt; 10, Page size -&gt; 20</li>
+</ul> </p></td>
                 </tr>
               
             </tbody>
@@ -980,7 +980,7 @@ Example:
         
       
         <h3 id="ondewo.survey.ListSurveysResponse" class="title-badge message">ListSurveysResponse</h3>
-        <p>The response message for [Intents.ListIntents][google.cloud.dialogflow.v2.Intents.ListIntents].</p>
+        <p><p>The response message for <a href="index.html#google.cloud.dialogflow.v2.Intents.ListIntents">Intents.ListIntents</a>.</p></p>
 
         
           <table class="field-table">
@@ -993,16 +993,14 @@ Example:
                   <td>surveys</td>
                   <td><a href="#ondewo.survey.Survey">Survey</a></td>
                   <td>repeated</td>
-                  <td><p>The list of surveys. There will be a maximum number of items
-returned based on the page_token field in the request. </p></td>
+                  <td><p>The list of surveys. There will be a maximum number of items returned based on the page_token field in the request. </p></td>
                 </tr>
               
                 <tr>
                   <td>next_page_token</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p>Token to retrieve the next page of results, or empty if there are no
-more results in the list. </p></td>
+                  <td><p>Token to retrieve the next page of results, or empty if there are no more results in the list. </p></td>
                 </tr>
               
             </tbody>
@@ -1013,7 +1011,7 @@ more results in the list. </p></td>
         
       
         <h3 id="ondewo.survey.MultipleChoiceQuestion" class="title-badge message">MultipleChoiceQuestion</h3>
-        <p>A question for which exactly one or more out of a predefined set of options are expected as answers</p><p>Example: MultipleChoiceQuestion(</p><p>question_text='Which colors do you like?',</p><p>choices=[</p><p>Choice(synonyms=['red', 'reddisch']),</p><p>Choice(synonyms=['blue', 'blueish']),</p><p>Choice(synonyms=['yellow']),</p><p>]</p><p>)</p>
+        <p><p>A question for which exactly one or more out of a predefined set of options are expected as answers</p></p><p><p>Example: <code>MultipleChoiceQuestion(question_text=&apos;Which colors do you like?&apos;, choices=[Choice(synonyms=[&apos;red&apos;, &apos;reddisch&apos;]), Choice(synonyms=[&apos;blue&apos;, &apos;blueish&apos;]), Choice(synonyms=[&apos;yellow&apos;])])</code></p></p>
 
         
           <table class="field-table">
@@ -1046,7 +1044,7 @@ Note: needs to contain at least 2 choices </p></td>
         
       
         <h3 id="ondewo.survey.MultipleParameterQuestion" class="title-badge message">MultipleParameterQuestion</h3>
-        <p>MultipleParameterQuestion defines a question which prompts the user for one or several entities of one particular type</p><p>Example: MultipleParameterQuestion(question_text='How old are your children?', parameter_type='sys.number')</p>
+        <p><p>MultipleParameterQuestion defines a question which prompts the user for one or several entities of one particular type</p></p><p><p>Example: <code>MultipleParameterQuestion(question_text=&apos;How old are your children?&apos;, parameter_type=&apos;sys.number&apos;)</code></p></p>
 
         
           <table class="field-table">
@@ -1078,7 +1076,7 @@ Note: the corresponding entity_type must exist (system entity type) and is not a
         
       
         <h3 id="ondewo.survey.OpenQuestion" class="title-badge message">OpenQuestion</h3>
-        <p>A question to which any kind of reply can be given and recorded</p><p>fixme: not working yet</p>
+        <p><p>A question to which any kind of reply can be given and recorded</p></p><p><p>fixme: not working yet</p></p>
 
         
           <table class="field-table">
@@ -1230,7 +1228,7 @@ Note: the corresponding entity_type must exist (system entity type) and is not a
         
       
         <h3 id="ondewo.survey.SingleChoiceQuestion" class="title-badge message">SingleChoiceQuestion</h3>
-        <p>A question for which exactly one out of a predefined set of options is expected as answer</p><p>Example: SingleChoiceQuestion(</p><p>question_text='Who is your favorite movie hero?',</p><p>choices=[</p><p>Choice(synonyms=['Bond', 'James Bond']),</p><p>Choice(synonyms=['Batman']),</p><p>Choice(synonyms=['Superman', 'Clark Kent']),</p><p>]</p><p>)</p>
+        <p><p>A question for which exactly one out of a predefined set of options is expected as answer</p></p><p><p>Example: <code>SingleChoiceQuestion(question_text=&apos;Who is your favorite movie hero?&apos;, choices=[Choice(synonyms=[&apos;Bond&apos;, &apos;James Bond&apos;]), Choice(synonyms=[&apos;Batman&apos;]), Choice(synonyms=[&apos;Superman&apos;, &apos;Clark Kent&apos;])])</code></p></p>
 
         
           <table class="field-table">
@@ -1263,7 +1261,7 @@ Note: needs to contain at least 2 choices </p></td>
         
       
         <h3 id="ondewo.survey.SingleParameterQuestion" class="title-badge message">SingleParameterQuestion</h3>
-        <p>SingleParameterQuestion defines a question which prompts the user for one entity of a particular type</p><p>Example: SingleParameterQuestion(question_text='How old are you?', parameter_type='sys.number')</p>
+        <p><p>SingleParameterQuestion defines a question which prompts the user for one entity of a particular type</p></p><p><p>Example: <code>SingleParameterQuestion(question_text=&apos;How old are you?&apos;, parameter_type=&apos;sys.number&apos;)</code></p></p>
 
         
           <table class="field-table">
@@ -1309,7 +1307,7 @@ Note: the corresponding entity_type must exist (system entity type) and is not a
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>The project identifier for this survey. Equal to the parent of the corresponding Agent.
-Format: `projects/<Project ID>/agent`.
+Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
 Read-only in the Survey message (assigned by the back-end) </p></td>
                 </tr>
               
@@ -1326,7 +1324,6 @@ Read-only in the Survey message (assigned by the back-end) </p></td>
                   <td></td>
                   <td><p>Required. The language of the agent created for the survey.
 This is also the only supported language of the agent.
-
 ISO 639-1 language code </p></td>
                 </tr>
               
@@ -1380,7 +1377,7 @@ ISO 639-1 language code </p></td>
                   <td><a href="#string">string</a></td>
                   <td></td>
                   <td><p>The project identifier for this survey. Equal to the parent of the corresponding Agent.
-Format: `projects/<Project ID>/agent`. </p></td>
+Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
                 </tr>
               
                 <tr>
@@ -1398,7 +1395,7 @@ Format: `projects/<Project ID>/agent`. </p></td>
         
       
         <h3 id="ondewo.survey.SurveyInfo" class="title-badge message">SurveyInfo</h3>
-        <p>Collect information about the entity behind the survey, the purpose of the survey, legal stuff, etc.</p><p>This is needed to generate meaningful messages and training data for some of the auto-generated intents.</p>
+        <p><p>Collect information about the entity behind the survey, the purpose of the survey, legal stuff, etc.</p></p><p><p>This is needed to generate meaningful messages and training data for some of the auto-generated intents.</p></p>
 
         
           <table class="field-table">
@@ -1477,10 +1474,9 @@ A one-word explanation of the survey topic (in pronounceable form) </p></td>
                   <td></td>
                   <td><p>Required.
 A pronounceable explanation of the legal implications of participating in the survey.
-For example:
- "Your answers during this survey will be stored anonymously for the next two years and then deleted."
+For example: &quot;Your answers during this survey will be stored anonymously for the next two years and then deleted.&quot;
 Should be formulated such that the agent can afterwards ask for the consent of the user.
-Example for how the agent could continue: "Are you willing to participate in this survey?" </p></td>
+Example for how the agent could continue: &quot;Are you willing to participate in this survey?&quot; </p></td>
                 </tr>
               
                 <tr>
@@ -1521,8 +1517,7 @@ If the survey is not anonymous, the name of the people as well as their number w
                   <td><a href="#google.protobuf.FieldMask">google.protobuf.FieldMask</a></td>
                   <td></td>
                   <td><p>Optional. Field mask that defines which fields get updated. Default: all fields are updated.
-Example:
-         - update_mask = FieldMask( [ 'survey.display_name', 'survey.questions' ] ) </p></td>
+Example: <code>update_mask = FieldMask([&apos;survey.display_name&apos;, &apos;survey.questions&apos;])</code> </p></td>
                 </tr>
               
             </tbody>
@@ -1538,7 +1533,7 @@ Example:
       <div id="ondewo/survey/survey.proto-enums" class="object-category">Enums</div>
       
         <h3 id="ondewo.survey.SubFlow" class="title-badge enum">SubFlow</h3>
-        <p>Enumeration of (some of) the subflows which are created by default</p><p>This can be used to "switch off" particular subflows when creating an agent during CreateSurvey</p><p>Subflows are defined as one of the following:</p><p>- sequences of intents A -> B_1, ..., B_n -> ... -> Z_1, ..., Z_m which are linked by context relationships</p><p>such that the first intent in the sequence can always be triggered</p><p>- single intents which can always be triggered</p>
+        <p><p>Enumeration of (some of) the subflows which are created by default</p></p><p><p>This can be used to &quot;switch off&quot; particular subflows when creating an agent during CreateSurvey</p></p><p><p>Subflows are defined as one of the following:</p></p><p><ul></p><p><li>sequences of intents A -&gt; B_1, ..., B_n -&gt; ... -&gt; Z_1, ..., Z_m which are linked by context relationships such that the first intent in the sequence can always be triggered</li></p><p><li>single intents which can always be triggered</li></p><p></ul></p>
         <table class="enum-table">
           <thead>
             <tr><td>Name</td><td>Number</td><td>Description</td></tr>
