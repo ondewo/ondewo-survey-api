@@ -60,7 +60,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.CreateFHIRSurveyRequest"></a>
 
 ### CreateFHIRSurveyRequest
-
+Request message for creating a survey from FHIR format
 
 
 | Field | Type | Label | Description |
@@ -75,7 +75,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.SurveyFHIRAnswersResponse"></a>
 
 ### SurveyFHIRAnswersResponse
-
+Response message containing survey answers in FHIR format
 
 
 | Field | Type | Label | Description |
@@ -125,7 +125,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.AgentSurveyRequest"></a>
 
 ### AgentSurveyRequest
-
+Request message for agent-related survey operations
 
 
 | Field | Type | Label | Description |
@@ -140,7 +140,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.AgentSurveyResponse"></a>
 
 ### AgentSurveyResponse
-
+Response message for agent-related survey operations
 
 
 | Field | Type | Label | Description |
@@ -155,7 +155,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.Answer"></a>
 
 ### Answer
-
+An answer to a survey question collected during a session
 
 
 | Field | Type | Label | Description |
@@ -165,8 +165,8 @@ Unless required by applicable law or agreed to in writing, software distributed 
 | answer_text | [string](#string) |  | Required; the full answer text |
 | answer_parameter | [string](#string) |  | fixme: better names and doc-strings below Optional; contains the normalized value of the selected option (parameter) extracted |
 | answer_parameter_original | [string](#string) |  | Optional; contains the original text of the selected option (parameter) extracted |
-| anonymous | [bool](#bool) |  |  |
-| user_information | [Answer.UserInfo](#ondewo.survey.Answer.UserInfo) |  |  |
+| anonymous | [bool](#bool) |  | True if the survey is anonymous, false otherwise |
+| user_information | [Answer.UserInfo](#ondewo.survey.Answer.UserInfo) |  | User information if the survey is not anonymous |
 
 
 
@@ -176,7 +176,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.Answer.UserInfo"></a>
 
 ### Answer.UserInfo
-
+User information for non-anonymous surveys
 
 
 | Field | Type | Label | Description |
@@ -213,12 +213,12 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.CreateSurveyRequest"></a>
 
 ### CreateSurveyRequest
-
+Request message for creating a new survey
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| survey | [Survey](#ondewo.survey.Survey) |  |  |
+| survey | [Survey](#ondewo.survey.Survey) |  | The survey to create |
 
 
 
@@ -228,7 +228,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.DeleteSurveyRequest"></a>
 
 ### DeleteSurveyRequest
-
+Request message for deleting a survey
 
 
 | Field | Type | Label | Description |
@@ -243,7 +243,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.GetAllSurveyAnswersRequest"></a>
 
 ### GetAllSurveyAnswersRequest
-
+Request message for retrieving all survey answers
 
 
 | Field | Type | Label | Description |
@@ -258,12 +258,12 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.GetSurveyAnswersRequest"></a>
 
 ### GetSurveyAnswersRequest
-
+Request message for retrieving survey answers for a specific session or user
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| survey_id | [string](#string) |  |  |
+| survey_id | [string](#string) |  | The project identifier for this survey. Equal to the parent of the corresponding Agent. Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> |
 | session_id | [string](#string) |  | ID of one specific session on which survey answers were collected (contains survey_id) |
 | user_id | [string](#string) |  | User Identifier. Note, if the survey is anonymous there will no identifier to filter on |
 | user_phone_number | [string](#string) |  | User phone number. Note, if the survey is anonymous there will no identifier to filter on |
@@ -276,7 +276,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.GetSurveyRequest"></a>
 
 ### GetSurveyRequest
-
+Request message for retrieving a survey
 
 
 | Field | Type | Label | Description |
@@ -291,7 +291,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.ListSurveysRequest"></a>
 
 ### ListSurveysRequest
-
+Request message for listing surveys with pagination support
 
 
 | Field | Type | Label | Description |
@@ -372,17 +372,17 @@ Unless required by applicable law or agreed to in writing, software distributed 
 <a name="ondewo.survey.Question"></a>
 
 ### Question
-
+A question that can be one of several question types: open-ended, single choice, multiple choice, scale, or parameter-based questions
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| open_question | [OpenQuestion](#ondewo.survey.OpenQuestion) |  |  |
-| single_choice_question | [SingleChoiceQuestion](#ondewo.survey.SingleChoiceQuestion) |  |  |
-| multiple_choice_question | [MultipleChoiceQuestion](#ondewo.survey.MultipleChoiceQuestion) |  |  |
+| open_question | [OpenQuestion](#ondewo.survey.OpenQuestion) |  | A question to which any kind of reply can be given and recorded |
+| single_choice_question | [SingleChoiceQuestion](#ondewo.survey.SingleChoiceQuestion) |  | A question for which exactly one out of a predefined set of options is expected as answer |
+| multiple_choice_question | [MultipleChoiceQuestion](#ondewo.survey.MultipleChoiceQuestion) |  | A question for which exactly one or more out of a predefined set of options are expected as answers |
 | scale_question | [ScaleQuestion](#ondewo.survey.ScaleQuestion) |  | convenience wrapper around a SingleChoiceQuestion |
-| single_parameter_question | [SingleParameterQuestion](#ondewo.survey.SingleParameterQuestion) |  |  |
-| multiple_parameter_question | [MultipleParameterQuestion](#ondewo.survey.MultipleParameterQuestion) |  |  |
+| single_parameter_question | [SingleParameterQuestion](#ondewo.survey.SingleParameterQuestion) |  | A question for which one or more entities of a particular type are expected as answers |
+| multiple_parameter_question | [MultipleParameterQuestion](#ondewo.survey.MultipleParameterQuestion) |  | A question for which one or more entities of a particular type are expected as answers |
 
 
 
@@ -398,8 +398,8 @@ A question for which an answer on a user-defined scale is expected
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | question_text | [string](#string) |  | The text which introduces the question (should be pronounceable) |
-| min_value | [ScaleQuestion.ScaleValue](#ondewo.survey.ScaleQuestion.ScaleValue) |  |  |
-| max_value | [ScaleQuestion.ScaleValue](#ondewo.survey.ScaleQuestion.ScaleValue) |  |  |
+| min_value | [ScaleQuestion.ScaleValue](#ondewo.survey.ScaleQuestion.ScaleValue) |  | Minimum value and label for the scale |
+| max_value | [ScaleQuestion.ScaleValue](#ondewo.survey.ScaleQuestion.ScaleValue) |  | Maximum value and label for the scale |
 
 
 
@@ -409,13 +409,13 @@ A question for which an answer on a user-defined scale is expected
 <a name="ondewo.survey.ScaleQuestion.ScaleValue"></a>
 
 ### ScaleQuestion.ScaleValue
-
+Represents a value and label pair for scale question endpoints
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| value | [int32](#int32) |  |  |
-| label | [string](#string) |  |  |
+| value | [int32](#int32) |  | Numeric value for this scale point |
+| label | [string](#string) |  | Human-readable label for this scale point |
 
 
 
@@ -459,7 +459,7 @@ A question for which an answer on a user-defined scale is expected
 <a name="ondewo.survey.Survey"></a>
 
 ### Survey
-
+A survey containing questions and metadata for conducting user surveys
 
 
 | Field | Type | Label | Description |
@@ -480,7 +480,7 @@ A question for which an answer on a user-defined scale is expected
 <a name="ondewo.survey.SurveyAnswersResponse"></a>
 
 ### SurveyAnswersResponse
-
+Response message containing survey answers
 
 
 | Field | Type | Label | Description |
@@ -521,7 +521,7 @@ A question for which an answer on a user-defined scale is expected
 <a name="ondewo.survey.UpdateSurveyRequest"></a>
 
 ### UpdateSurveyRequest
-
+Request message for updating an existing survey
 
 
 | Field | Type | Label | Description |
@@ -568,10 +568,10 @@ A question for which an answer on a user-defined scale is expected
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| TO_BE_INITIALIZED | 0 |  |
-| UPDATED | 1 |  |
-| UPDATING | 2 |  |
-| OUTDATED | 3 |  |
+| TO_BE_INITIALIZED | 0 | Agent has not been initialized yet |
+| UPDATED | 1 | Agent has been successfully updated and is current |
+| UPDATING | 2 | Agent is currently being updated |
+| OUTDATED | 3 | Agent is outdated and needs to be updated |
 
 
  <!-- end enums -->

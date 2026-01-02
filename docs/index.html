@@ -334,7 +334,7 @@
       <div id="ondewo/survey/fhir.proto-messages" class="object-category">Messages</div>
       
         <h3 id="ondewo.survey.CreateFHIRSurveyRequest" class="title-badge message">CreateFHIRSurveyRequest</h3>
-        <p></p>
+        <p>Request message for creating a survey from FHIR format</p>
 
         
           <table class="field-table">
@@ -358,7 +358,7 @@
         
       
         <h3 id="ondewo.survey.SurveyFHIRAnswersResponse" class="title-badge message">SurveyFHIRAnswersResponse</h3>
-        <p></p>
+        <p>Response message containing survey answers in FHIR format</p>
 
         
           <table class="field-table">
@@ -600,7 +600,7 @@ Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
       <div id="ondewo/survey/survey.proto-messages" class="object-category">Messages</div>
       
         <h3 id="ondewo.survey.AgentSurveyRequest" class="title-badge message">AgentSurveyRequest</h3>
-        <p></p>
+        <p>Request message for agent-related survey operations</p>
 
         
           <table class="field-table">
@@ -625,7 +625,7 @@ Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
         
       
         <h3 id="ondewo.survey.AgentSurveyResponse" class="title-badge message">AgentSurveyResponse</h3>
-        <p></p>
+        <p>Response message for agent-related survey operations</p>
 
         
           <table class="field-table">
@@ -650,7 +650,7 @@ Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
         
       
         <h3 id="ondewo.survey.Answer" class="title-badge message">Answer</h3>
-        <p></p>
+        <p>An answer to a survey question collected during a session</p>
 
         
           <table class="field-table">
@@ -699,14 +699,14 @@ Optional; contains the normalized value of the selected option (parameter) extra
                   <td>anonymous</td>
                   <td><a href="#bool">bool</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>True if the survey is anonymous, false otherwise </p></td>
                 </tr>
               
                 <tr>
                   <td>user_information</td>
                   <td><a href="#ondewo.survey.Answer.UserInfo">Answer.UserInfo</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>User information if the survey is not anonymous </p></td>
                 </tr>
               
             </tbody>
@@ -717,7 +717,7 @@ Optional; contains the normalized value of the selected option (parameter) extra
         
       
         <h3 id="ondewo.survey.Answer.UserInfo" class="title-badge message">Answer.UserInfo</h3>
-        <p></p>
+        <p>User information for non-anonymous surveys</p>
 
         
           <table class="field-table">
@@ -808,7 +808,7 @@ Note: the follow-up question is only available for the SingleChoiceQuestion </p>
         
       
         <h3 id="ondewo.survey.CreateSurveyRequest" class="title-badge message">CreateSurveyRequest</h3>
-        <p></p>
+        <p>Request message for creating a new survey</p>
 
         
           <table class="field-table">
@@ -821,7 +821,7 @@ Note: the follow-up question is only available for the SingleChoiceQuestion </p>
                   <td>survey</td>
                   <td><a href="#ondewo.survey.Survey">Survey</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>The survey to create </p></td>
                 </tr>
               
             </tbody>
@@ -832,7 +832,7 @@ Note: the follow-up question is only available for the SingleChoiceQuestion </p>
         
       
         <h3 id="ondewo.survey.DeleteSurveyRequest" class="title-badge message">DeleteSurveyRequest</h3>
-        <p></p>
+        <p>Request message for deleting a survey</p>
 
         
           <table class="field-table">
@@ -857,7 +857,7 @@ Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
         
       
         <h3 id="ondewo.survey.GetAllSurveyAnswersRequest" class="title-badge message">GetAllSurveyAnswersRequest</h3>
-        <p></p>
+        <p>Request message for retrieving all survey answers</p>
 
         
           <table class="field-table">
@@ -882,7 +882,7 @@ Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
         
       
         <h3 id="ondewo.survey.GetSurveyAnswersRequest" class="title-badge message">GetSurveyAnswersRequest</h3>
-        <p></p>
+        <p>Request message for retrieving survey answers for a specific session or user</p>
 
         
           <table class="field-table">
@@ -895,7 +895,8 @@ Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
                   <td>survey_id</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>The project identifier for this survey. Equal to the parent of the corresponding Agent.
+Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
                 </tr>
               
                 <tr>
@@ -927,7 +928,7 @@ Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
         
       
         <h3 id="ondewo.survey.GetSurveyRequest" class="title-badge message">GetSurveyRequest</h3>
-        <p></p>
+        <p>Request message for retrieving a survey</p>
 
         
           <table class="field-table">
@@ -952,7 +953,7 @@ Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre> </p></td>
         
       
         <h3 id="ondewo.survey.ListSurveysRequest" class="title-badge message">ListSurveysRequest</h3>
-        <p></p>
+        <p>Request message for listing surveys with pagination support</p>
 
         
           <table class="field-table">
@@ -1100,7 +1101,7 @@ Note: the corresponding entity_type must exist (system entity type) and is not a
         
       
         <h3 id="ondewo.survey.Question" class="title-badge message">Question</h3>
-        <p></p>
+        <p>A question that can be one of several question types: open-ended, single choice, multiple choice, scale, or parameter-based questions</p>
 
         
           <table class="field-table">
@@ -1113,21 +1114,21 @@ Note: the corresponding entity_type must exist (system entity type) and is not a
                   <td>open_question</td>
                   <td><a href="#ondewo.survey.OpenQuestion">OpenQuestion</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>A question to which any kind of reply can be given and recorded </p></td>
                 </tr>
               
                 <tr>
                   <td>single_choice_question</td>
                   <td><a href="#ondewo.survey.SingleChoiceQuestion">SingleChoiceQuestion</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>A question for which exactly one out of a predefined set of options is expected as answer </p></td>
                 </tr>
               
                 <tr>
                   <td>multiple_choice_question</td>
                   <td><a href="#ondewo.survey.MultipleChoiceQuestion">MultipleChoiceQuestion</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>A question for which exactly one or more out of a predefined set of options are expected as answers </p></td>
                 </tr>
               
                 <tr>
@@ -1141,14 +1142,14 @@ Note: the corresponding entity_type must exist (system entity type) and is not a
                   <td>single_parameter_question</td>
                   <td><a href="#ondewo.survey.SingleParameterQuestion">SingleParameterQuestion</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>A question for which one or more entities of a particular type are expected as answers </p></td>
                 </tr>
               
                 <tr>
                   <td>multiple_parameter_question</td>
                   <td><a href="#ondewo.survey.MultipleParameterQuestion">MultipleParameterQuestion</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>A question for which one or more entities of a particular type are expected as answers </p></td>
                 </tr>
               
             </tbody>
@@ -1179,14 +1180,14 @@ Note: the corresponding entity_type must exist (system entity type) and is not a
                   <td>min_value</td>
                   <td><a href="#ondewo.survey.ScaleQuestion.ScaleValue">ScaleQuestion.ScaleValue</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Minimum value and label for the scale </p></td>
                 </tr>
               
                 <tr>
                   <td>max_value</td>
                   <td><a href="#ondewo.survey.ScaleQuestion.ScaleValue">ScaleQuestion.ScaleValue</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Maximum value and label for the scale </p></td>
                 </tr>
               
             </tbody>
@@ -1197,7 +1198,7 @@ Note: the corresponding entity_type must exist (system entity type) and is not a
         
       
         <h3 id="ondewo.survey.ScaleQuestion.ScaleValue" class="title-badge message">ScaleQuestion.ScaleValue</h3>
-        <p></p>
+        <p>Represents a value and label pair for scale question endpoints</p>
 
         
           <table class="field-table">
@@ -1210,14 +1211,14 @@ Note: the corresponding entity_type must exist (system entity type) and is not a
                   <td>value</td>
                   <td><a href="#int32">int32</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Numeric value for this scale point </p></td>
                 </tr>
               
                 <tr>
                   <td>label</td>
                   <td><a href="#string">string</a></td>
                   <td></td>
-                  <td><p> </p></td>
+                  <td><p>Human-readable label for this scale point </p></td>
                 </tr>
               
             </tbody>
@@ -1293,7 +1294,7 @@ Note: the corresponding entity_type must exist (system entity type) and is not a
         
       
         <h3 id="ondewo.survey.Survey" class="title-badge message">Survey</h3>
-        <p></p>
+        <p>A survey containing questions and metadata for conducting user surveys</p>
 
         
           <table class="field-table">
@@ -1363,7 +1364,7 @@ ISO 639-1 language code </p></td>
         
       
         <h3 id="ondewo.survey.SurveyAnswersResponse" class="title-badge message">SurveyAnswersResponse</h3>
-        <p></p>
+        <p>Response message containing survey answers</p>
 
         
           <table class="field-table">
@@ -1496,7 +1497,7 @@ If the survey is not anonymous, the name of the people as well as their number w
         
       
         <h3 id="ondewo.survey.UpdateSurveyRequest" class="title-badge message">UpdateSurveyRequest</h3>
-        <p></p>
+        <p>Request message for updating an existing survey</p>
 
         
           <table class="field-table">
@@ -1608,25 +1609,25 @@ Example: <code>update_mask = FieldMask([&apos;survey.display_name&apos;, &apos;s
               <tr>
                 <td>TO_BE_INITIALIZED</td>
                 <td>0</td>
-                <td><p></p></td>
+                <td><p>Agent has not been initialized yet</p></td>
               </tr>
             
               <tr>
                 <td>UPDATED</td>
                 <td>1</td>
-                <td><p></p></td>
+                <td><p>Agent has been successfully updated and is current</p></td>
               </tr>
             
               <tr>
                 <td>UPDATING</td>
                 <td>2</td>
-                <td><p></p></td>
+                <td><p>Agent is currently being updated</p></td>
               </tr>
             
               <tr>
                 <td>OUTDATED</td>
                 <td>3</td>
-                <td><p></p></td>
+                <td><p>Agent is outdated and needs to be updated</p></td>
               </tr>
             
           </tbody>
