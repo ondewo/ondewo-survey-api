@@ -93,6 +93,7 @@ service Surveys {
 
 /////// Core Messages ///////
 
+// A survey containing questions and metadata for conducting user surveys
 message Survey {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
@@ -119,9 +120,13 @@ message Survey {
     // Note: All other attributes of the Agent message should be updated using the std mechanism of UpdateAgent once the survey has been created.
 
     enum AgentStatus {
+        // Agent has not been initialized yet
         TO_BE_INITIALIZED = 0;
+        // Agent has been successfully updated and is current
         UPDATED = 1;
+        // Agent is currently being updated
         UPDATING = 2;
+        // Agent is outdated and needs to be updated
         OUTDATED = 3;
     }
 
@@ -217,14 +222,20 @@ enum SubFlow {
 
 }
 
+// A question that can be one of several question types: open-ended, single choice, multiple choice, scale, or parameter-based questions
 message Question {
     oneof question {
+        // A question to which any kind of reply can be given and recorded
         OpenQuestion open_question = 1;
+        // A question for which exactly one out of a predefined set of options is expected as answer
         SingleChoiceQuestion single_choice_question = 2;
+        // A question for which exactly one or more out of a predefined set of options are expected as answers
         MultipleChoiceQuestion multiple_choice_question = 3;
         // convenience wrapper around a SingleChoiceQuestion
         ScaleQuestion scale_question = 4;
+        // A question for which one or more entities of a particular type are expected as answers
         SingleParameterQuestion single_parameter_question = 5;
+        // A question for which one or more entities of a particular type are expected as answers
         MultipleParameterQuestion multiple_parameter_question = 6;
     }
 }
@@ -263,13 +274,18 @@ message MultipleChoiceQuestion {
 
 // A question for which an answer on a user-defined scale is expected
 message ScaleQuestion {
+    // Represents a value and label pair for scale question endpoints
     message ScaleValue {
+        // Numeric value for this scale point
         int32 value = 1;
+        // Human-readable label for this scale point
         string label = 2;
     }
     // The text which introduces the question (should be pronounceable)
     string question_text = 1;
+    // Minimum value and label for the scale
     ScaleValue min_value = 2;
+    // Maximum value and label for the scale
     ScaleValue max_value = 3;
 }
 
@@ -309,6 +325,7 @@ message Choice {
     string value = 3;
 }
 
+// An answer to a survey question collected during a session
 message Answer {
     // the number of the question to which this answer belongs
     int64 question_nr = 1;
@@ -326,6 +343,7 @@ message Answer {
     // Optional; contains the original text of the selected option (parameter) extracted
     string answer_parameter_original = 5;
 
+    // User information for non-anonymous surveys
     message UserInfo {
         // First name of the User to be surveyed
         string first_name = 1;
@@ -340,7 +358,9 @@ message Answer {
     }
 
     oneof is_anonymous {
+        // True if the survey is anonymous, false otherwise
         bool anonymous = 7;
+        // User information if the survey is not anonymous
         UserInfo user_information = 6;
     }
 }
@@ -348,16 +368,20 @@ message Answer {
 
 /////// Request / Response messages ///////
 
+// Request message for creating a new survey
 message CreateSurveyRequest {
+    // The survey to create
     Survey survey = 1;
 }
 
+// Request message for retrieving a survey
 message GetSurveyRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     string survey_id = 1;
 }
 
+// Request message for updating an existing survey
 message UpdateSurveyRequest {
     // Updated survey. Note: the ID must refer to an existing survey which will be updated
     Survey survey = 1;
@@ -367,13 +391,17 @@ message UpdateSurveyRequest {
     google.protobuf.FieldMask update_mask = 2;
 }
 
+// Request message for deleting a survey
 message DeleteSurveyRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     string survey_id = 1;
 }
 
+// Request message for retrieving survey answers for a specific session or user
 message GetSurveyAnswersRequest {
+    // The project identifier for this survey. Equal to the parent of the corresponding Agent.
+    // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     string survey_id = 1;
 
     oneof identifier {
@@ -386,12 +414,14 @@ message GetSurveyAnswersRequest {
     }
 }
 
+// Request message for retrieving all survey answers
 message GetAllSurveyAnswersRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     string survey_id = 1;
 }
 
+// Response message containing survey answers
 message SurveyAnswersResponse {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
@@ -400,6 +430,7 @@ message SurveyAnswersResponse {
     repeated Answer answers = 2;
 }
 
+// Request message for listing surveys with pagination support
 message ListSurveysRequest {
     // Optional. The next_page_token value returned from a previous list request.
     // Example:
@@ -418,12 +449,14 @@ message ListSurveysResponse {
     string next_page_token = 2;
 }
 
+// Request message for agent-related survey operations
 message AgentSurveyRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     string survey_id = 1;
 }
 
+// Response message for agent-related survey operations
 message AgentSurveyResponse {
     // The parent of an agent. Equal to the survey ID.
     // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>

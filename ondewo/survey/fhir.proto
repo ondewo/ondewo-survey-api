@@ -42,11 +42,13 @@ service FHIR {
     }
 }
 
+// Request message for creating a survey from FHIR format
 message CreateFHIRSurveyRequest {
     // FHIR questionnaire on a gRPC Struct format
     google.protobuf.Struct fhir_questionnaire = 1;
 }
 
+// Response message containing survey answers in FHIR format
 message SurveyFHIRAnswersResponse {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
     // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
