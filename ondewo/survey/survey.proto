@@ -1,16 +1,10 @@
 // Copyright 2020 ONDEWO GmbH
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//     <a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License. (editesyntax = "proto3";
+// Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License. (editesyntax = "proto3";
 syntax = "proto3";
 
 package ondewo.survey;
@@ -22,7 +16,7 @@ import "google/protobuf/field_mask.proto";
 /////// Services ///////
 
 service Surveys {
-    // Create a Survey and an empty NLU Agent for it
+    // <p>Create a Survey and an empty NLU Agent for it</p>
     rpc CreateSurvey (CreateSurveyRequest) returns (Survey) {
         option (google.api.http) = {
             post: "/survey"
@@ -30,14 +24,14 @@ service Surveys {
         };
     }
 
-    // Retrieve a Survey message from the Database and return it
+    // <p>Retrieve a Survey message from the Database and return it</p>
     rpc GetSurvey (GetSurveyRequest) returns (Survey) {
         option (google.api.http) = {
             get: "/survey/{survey_id=*}"
         };
     }
 
-    // Update an existing Survey message from the Database and return it
+    // <p>Update an existing Survey message from the Database and return it</p>
     rpc UpdateSurvey (UpdateSurveyRequest) returns (Survey) {
         option (google.api.http) = {
             patch: "/survey/{survey_id=*}"
@@ -45,35 +39,35 @@ service Surveys {
         };
     }
 
-    // Delete a survey and its associated agent (if existent)
+    // <p>Delete a survey and its associated agent (if existent)</p>
     rpc DeleteSurvey (DeleteSurveyRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             delete: "/survey/{survey_id=*}"
         };
     }
 
-    // Returns the list of all surveys in the server
+    // <p>Returns the list of all surveys in the server</p>
     rpc ListSurveys (ListSurveysRequest) returns (ListSurveysResponse) {
         option (google.api.http) = {
             get: "/surveys"
         };
     }
 
-    // Retrieve answers to survey questions collected in interactions with a survey agent for a specific session
+    // <p>Retrieve answers to survey questions collected in interactions with a survey agent for a specific session</p>
     rpc GetSurveyAnswers (GetSurveyAnswersRequest) returns (SurveyAnswersResponse) {
         option (google.api.http) = {
             get: "/survey/{survey_id=*}/answers/{session_id=*}"
         };
     }
 
-    // Retrieve all answers to survey questions collected in interactions with a survey agent in any session
+    // <p>Retrieve all answers to survey questions collected in interactions with a survey agent in any session</p>
     rpc GetAllSurveyAnswers (GetAllSurveyAnswersRequest) returns (SurveyAnswersResponse) {
         option (google.api.http) = {
             get: "/survey/{survey_id=*}/answers"
         };
     }
 
-    // Populate and configures an NLU Agent from a Survey
+    // <p>Populate and configures an NLU Agent from a Survey</p>
     rpc CreateAgentSurvey (AgentSurveyRequest) returns (AgentSurveyResponse) {
         option (google.api.http) = {
             post: "/survey/{survey_id=*}/agent"
@@ -81,7 +75,7 @@ service Surveys {
         };
     }
 
-    // Update an NLU agent from a survey
+    // <p>Update an NLU agent from a survey</p>
     rpc UpdateAgentSurvey (AgentSurveyRequest) returns (AgentSurveyResponse) {
         option (google.api.http) = {
             patch: "/survey/{survey_id=*}/agent"
@@ -89,7 +83,7 @@ service Surveys {
         };
     }
 
-    // Deletes all data of an NLU agent associated to a survey
+    // <p>Deletes all data of an NLU agent associated to a survey</p>
     rpc DeleteAgentSurvey (AgentSurveyRequest) returns (google.protobuf.Empty) {
         option (google.api.http) = {
             delete: "/survey/{survey_id=*}/agent/delete"
@@ -99,9 +93,10 @@ service Surveys {
 
 /////// Core Messages ///////
 
+// A survey containing questions and metadata for conducting user surveys
 message Survey {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
-    // Format: `projects/<Project ID>/agent`.
+    // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     // Read-only in the Survey message (assigned by the back-end)
     string survey_id = 1;
 
@@ -110,7 +105,8 @@ message Survey {
 
     // Required. The language of the agent created for the survey.
     // This is also the only supported language of the agent.
-    string language_code = 3; // ISO 639-1 language code
+    // ISO 639-1 language code
+    string language_code = 3;
 
     // Required. List of questions to be asked during the survey.
     repeated Question questions = 7;
@@ -121,13 +117,16 @@ message Survey {
     // Optional. List of subflows excluded for this survey.
     repeated SubFlow exclude_subflows = 9;
 
-    // Note: All other attributes of the Agent message should be updated using the std mechanism of UpdateAgent
-    //  once the survey has been created.
+    // Note: All other attributes of the Agent message should be updated using the std mechanism of UpdateAgent once the survey has been created.
 
     enum AgentStatus {
+        // Agent has not been initialized yet
         TO_BE_INITIALIZED = 0;
+        // Agent has been successfully updated and is current
         UPDATED = 1;
+        // Agent is currently being updated
         UPDATING = 2;
+        // Agent is outdated and needs to be updated
         OUTDATED = 3;
     }
 
@@ -135,8 +134,8 @@ message Survey {
     AgentStatus status = 10;
 }
 
-// Collect information about the entity behind the survey, the purpose of the survey, legal stuff, etc.
-// This is needed to generate meaningful messages and training data for some of the auto-generated intents.
+// <p>Collect information about the entity behind the survey, the purpose of the survey, legal stuff, etc.</p>
+// <p>This is needed to generate meaningful messages and training data for some of the auto-generated intents.</p>
 message SurveyInfo {
 
     // Required unless SubFlow.LEGAL_ENTITY is deselected.
@@ -173,10 +172,9 @@ message SurveyInfo {
 
     // Required.
     // A pronounceable explanation of the legal implications of participating in the survey.
-    // For example:
-    //  "Your answers during this survey will be stored anonymously for the next two years and then deleted."
+    // For example: &quot;Your answers during this survey will be stored anonymously for the next two years and then deleted.&quot;
     // Should be formulated such that the agent can afterwards ask for the consent of the user.
-    // Example for how the agent could continue: "Are you willing to participate in this survey?"
+    // Example for how the agent could continue: &quot;Are you willing to participate in this survey?&quot;
     string legal_disclaimer = 9;
 
     // Optional.
@@ -187,12 +185,13 @@ message SurveyInfo {
 }
 
 
-// Enumeration of (some of) the subflows which are created by default
-// This can be used to "switch off" particular subflows when creating an agent during CreateSurvey
-// Subflows are defined as one of the following:
-// - sequences of intents A -> B_1, ..., B_n -> ... -> Z_1, ..., Z_m which are linked by context relationships
-//      such that the first intent in the sequence can always be triggered
-// - single intents which can always be triggered
+// <p>Enumeration of (some of) the subflows which are created by default</p>
+// <p>This can be used to &quot;switch off&quot; particular subflows when creating an agent during CreateSurvey</p>
+// <p>Subflows are defined as one of the following:</p>
+// <ul>
+//   <li>sequences of intents A -&gt; B_1, ..., B_n -&gt; ... -&gt; Z_1, ..., Z_m which are linked by context relationships such that the first intent in the sequence can always be triggered</li>
+//   <li>single intents which can always be triggered</li>
+// </ul>
 enum SubFlow {
     // Not specified. This value should be never used.
     SUBFLOW_UNSPECIFIED = 0;
@@ -223,34 +222,34 @@ enum SubFlow {
 
 }
 
+// A question that can be one of several question types: open-ended, single choice, multiple choice, scale, or parameter-based questions
 message Question {
     oneof question {
+        // A question to which any kind of reply can be given and recorded
         OpenQuestion open_question = 1;
+        // A question for which exactly one out of a predefined set of options is expected as answer
         SingleChoiceQuestion single_choice_question = 2;
+        // A question for which exactly one or more out of a predefined set of options are expected as answers
         MultipleChoiceQuestion multiple_choice_question = 3;
-        ScaleQuestion scale_question = 4; // convenience wrapper around a SingleChoiceQuestion
+        // convenience wrapper around a SingleChoiceQuestion
+        ScaleQuestion scale_question = 4;
+        // A question for which one or more entities of a particular type are expected as answers
         SingleParameterQuestion single_parameter_question = 5;
+        // A question for which one or more entities of a particular type are expected as answers
         MultipleParameterQuestion multiple_parameter_question = 6;
     }
 }
 
 
-// A question to which any kind of reply can be given and recorded
-// fixme: not working yet
+// <p>A question to which any kind of reply can be given and recorded</p>
+// <p>fixme: not working yet</p>
 message OpenQuestion {
     // The text which introduces the question (should be pronounceable)
     string question_text = 1;
 }
 
-// A question for which exactly one out of a predefined set of options is expected as answer
-// Example: SingleChoiceQuestion(
-//      question_text='Who is your favorite movie hero?',
-//      choices=[
-//          Choice(synonyms=['Bond', 'James Bond']),
-//          Choice(synonyms=['Batman']),
-//          Choice(synonyms=['Superman', 'Clark Kent']),
-//          ]
-//      )
+// <p>A question for which exactly one out of a predefined set of options is expected as answer</p>
+// <p>Example: <code>SingleChoiceQuestion(question_text=&apos;Who is your favorite movie hero?&apos;, choices=[Choice(synonyms=[&apos;Bond&apos;, &apos;James Bond&apos;]), Choice(synonyms=[&apos;Batman&apos;]), Choice(synonyms=[&apos;Superman&apos;, &apos;Clark Kent&apos;])])</code></p>
 message SingleChoiceQuestion {
     // The text which introduces the question (should be pronounceable)
     string question_text = 1;
@@ -261,15 +260,8 @@ message SingleChoiceQuestion {
     repeated Choice choices = 2;
 }
 
-// A question for which exactly one or more out of a predefined set of options are expected as answers
-// Example: MultipleChoiceQuestion(
-//      question_text='Which colors do you like?',
-//      choices=[
-//          Choice(synonyms=['red', 'reddisch']),
-//          Choice(synonyms=['blue', 'blueish']),
-//          Choice(synonyms=['yellow']),
-//          ]
-//       )
+// <p>A question for which exactly one or more out of a predefined set of options are expected as answers</p>
+// <p>Example: <code>MultipleChoiceQuestion(question_text=&apos;Which colors do you like?&apos;, choices=[Choice(synonyms=[&apos;red&apos;, &apos;reddisch&apos;]), Choice(synonyms=[&apos;blue&apos;, &apos;blueish&apos;]), Choice(synonyms=[&apos;yellow&apos;])])</code></p>
 message MultipleChoiceQuestion {
     // The text which introduces the question (should be pronounceable)
     string question_text = 1;
@@ -282,18 +274,23 @@ message MultipleChoiceQuestion {
 
 // A question for which an answer on a user-defined scale is expected
 message ScaleQuestion {
+    // Represents a value and label pair for scale question endpoints
     message ScaleValue {
+        // Numeric value for this scale point
         int32 value = 1;
+        // Human-readable label for this scale point
         string label = 2;
     }
     // The text which introduces the question (should be pronounceable)
     string question_text = 1;
+    // Minimum value and label for the scale
     ScaleValue min_value = 2;
+    // Maximum value and label for the scale
     ScaleValue max_value = 3;
 }
 
-// SingleParameterQuestion defines a question which prompts the user for one entity of a particular type
-// Example: SingleParameterQuestion(question_text='How old are you?', parameter_type='sys.number')
+// <p>SingleParameterQuestion defines a question which prompts the user for one entity of a particular type</p>
+// <p>Example: <code>SingleParameterQuestion(question_text=&apos;How old are you?&apos;, parameter_type=&apos;sys.number&apos;)</code></p>
 message SingleParameterQuestion {
     // The text which introduces the question (should be pronounceable)
     string question_text = 1;
@@ -303,8 +300,8 @@ message SingleParameterQuestion {
     string parameter_type = 2;
 }
 
-// MultipleParameterQuestion defines a question which prompts the user for one or several entities of one particular type
-// Example: MultipleParameterQuestion(question_text='How old are your children?', parameter_type='sys.number')
+// <p>MultipleParameterQuestion defines a question which prompts the user for one or several entities of one particular type</p>
+// <p>Example: <code>MultipleParameterQuestion(question_text=&apos;How old are your children?&apos;, parameter_type=&apos;sys.number&apos;)</code></p>
 message MultipleParameterQuestion {
     // The text which introduces the question (should be pronounceable)
     string question_text = 1;
@@ -314,8 +311,8 @@ message MultipleParameterQuestion {
     string parameter_type = 2;
 }
 
-// The Choice message defines one "option" for the SingleChoiceQuestion and MultipleChoiceQuestion question types
-// Example: Choice(synonyms=["blue", "blueish", "pale blue", "deep blue"])
+// <p>The Choice message defines one &quot;option&quot; for the SingleChoiceQuestion and MultipleChoiceQuestion question types</p>
+// <p>Example: <code>Choice(synonyms=[&quot;blue&quot;, &quot;blueish&quot;, &quot;pale blue&quot;, &quot;deep blue&quot;])</code></p>
 message Choice {
     // The synonyms which are recognized as equivalent for identifying one option
     repeated string synonyms = 1;
@@ -324,10 +321,11 @@ message Choice {
     // Note: the follow-up question is only available for the SingleChoiceQuestion
     Question follow_up_question = 2;
 
-    // The "canonical value" (i.e. the entity value)
+    // The &quot;canonical value&quot; (i.e. the entity value)
     string value = 3;
 }
 
+// An answer to a survey question collected during a session
 message Answer {
     // the number of the question to which this answer belongs
     int64 question_nr = 1;
@@ -345,6 +343,7 @@ message Answer {
     // Optional; contains the original text of the selected option (parameter) extracted
     string answer_parameter_original = 5;
 
+    // User information for non-anonymous surveys
     message UserInfo {
         // First name of the User to be surveyed
         string first_name = 1;
@@ -359,7 +358,9 @@ message Answer {
     }
 
     oneof is_anonymous {
+        // True if the survey is anonymous, false otherwise
         bool anonymous = 7;
+        // User information if the survey is not anonymous
         UserInfo user_information = 6;
     }
 }
@@ -367,33 +368,40 @@ message Answer {
 
 /////// Request / Response messages ///////
 
+// Request message for creating a new survey
 message CreateSurveyRequest {
+    // The survey to create
     Survey survey = 1;
 }
 
+// Request message for retrieving a survey
 message GetSurveyRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
-    // Format: `projects/<Project ID>/agent`.
+    // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     string survey_id = 1;
 }
 
+// Request message for updating an existing survey
 message UpdateSurveyRequest {
     // Updated survey. Note: the ID must refer to an existing survey which will be updated
     Survey survey = 1;
 
     // Optional. Field mask that defines which fields get updated. Default: all fields are updated.
-    // Example:
-    //          - update_mask = FieldMask( [ 'survey.display_name', 'survey.questions' ] )
+    // Example: <code>update_mask = FieldMask([&apos;survey.display_name&apos;, &apos;survey.questions&apos;])</code>
     google.protobuf.FieldMask update_mask = 2;
 }
 
+// Request message for deleting a survey
 message DeleteSurveyRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
-    // Format: `projects/<Project ID>/agent`.
+    // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     string survey_id = 1;
 }
 
+// Request message for retrieving survey answers for a specific session or user
 message GetSurveyAnswersRequest {
+    // The project identifier for this survey. Equal to the parent of the corresponding Agent.
+    // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     string survey_id = 1;
 
     oneof identifier {
@@ -406,47 +414,51 @@ message GetSurveyAnswersRequest {
     }
 }
 
+// Request message for retrieving all survey answers
 message GetAllSurveyAnswersRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
-    // Format: `projects/<Project ID>/agent`.
+    // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     string survey_id = 1;
 }
 
+// Response message containing survey answers
 message SurveyAnswersResponse {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
-    // Format: `projects/<Project ID>/agent`.
+    // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     string survey_id = 1;
-    repeated Answer answers = 2; // all requested answers
+    // all requested answers
+    repeated Answer answers = 2;
 }
 
+// Request message for listing surveys with pagination support
 message ListSurveysRequest {
     // Optional. The next_page_token value returned from a previous list request.
     // Example:
-    //      "current_index-10--page_size-20"
-    //      Start page -> 10
-    //      Page size -> 20
+    // <ul>
+    //   <li>&quot;current_index-10--page_size-20&quot; - Start page -&gt; 10, Page size -&gt; 20</li>
+    // </ul>
     string page_token = 1;
 }
 
-// The response message for [Intents.ListIntents][google.cloud.dialogflow.v2.Intents.ListIntents].
+// <p>The response message for <a href="index.html#google.cloud.dialogflow.v2.Intents.ListIntents">Intents.ListIntents</a>.</p>
 message ListSurveysResponse {
-    // The list of surveys. There will be a maximum number of items
-    // returned based on the page_token field in the request.
+    // The list of surveys. There will be a maximum number of items returned based on the page_token field in the request.
     repeated Survey surveys = 1;
 
-    // Token to retrieve the next page of results, or empty if there are no
-    // more results in the list.
+    // Token to retrieve the next page of results, or empty if there are no more results in the list.
     string next_page_token = 2;
 }
 
+// Request message for agent-related survey operations
 message AgentSurveyRequest {
     // The project identifier for this survey. Equal to the parent of the corresponding Agent.
-    // Format: `projects/<Project ID>/agent`.
+    // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     string survey_id = 1;
 }
 
+// Response message for agent-related survey operations
 message AgentSurveyResponse {
     // The parent of an agent. Equal to the survey ID.
-    // Format: `projects/<Project ID>/agent`.
+    // Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
     string parent = 1;
 }
