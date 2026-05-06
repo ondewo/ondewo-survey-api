@@ -2,7 +2,6 @@ export
 # ---------------- BEFORE RELEASE ----------------
 # 1 - Update Version Number
 # 2 - Update RELEASE.md
-# 3 - make update_setup
 # -------------- Release Process Steps --------------
 # 1 - Get Credentials from devops-accounts repo
 # 2 - Create Release Branch and push
@@ -288,3 +287,28 @@ spc: ## Checks if the Release Branch, Tag and Pypi version already exist
 	$(eval filtered_tags:= $(shell git tag --list | grep "${ONDEWO_SURVEY_API_VERSION}"))
 	@if test "$(filtered_branches)" != ""; then echo "-- Test 1: Branch exists!!" & exit 1; else echo "-- Test 1: Branch is fine";fi
 	@if test "$(filtered_tags)" != ""; then echo "-- Test 2: Tag exists!!" & exit 1; else echo "-- Test 2: Tag is fine";fi
+
+########################################################
+#		UNRELEASE
+
+unrelease: build_utils_docker_image unrelease_to_github_via_docker_image ## Undo a release: delete the GitHub release, release branch, and release tag
+	@echo "Unrelease Finished"
+
+delete_gh_release: ## Delete GitHub Release, release branch and release tag via gh CLI
+	gh release delete --repo $(GH_REPO) "$(ONDEWO_SURVEY_API_VERSION)" --yes
+	git branch -D "release/${ONDEWO_SURVEY_API_VERSION}" || true
+	git push origin --delete "release/${ONDEWO_SURVEY_API_VERSION}" || true
+	git tag -d ${ONDEWO_SURVEY_API_VERSION} || true
+	git push origin --delete ${ONDEWO_SURVEY_API_VERSION} || true
+
+unrelease_to_github_via_docker_image: ## Execute unrelease through Docker container
+	docker run --rm \
+		-e GITHUB_GH_TOKEN=${GITHUB_GH_TOKEN} \
+		${IMAGE_UTILS_NAME} make delete_gh_release
+
+ondewo_unrelease: clone_devops_accounts run_unrelease_with_devops ## Unrelease with credentials from devops-accounts repo
+	@rm -rf ${DEVOPS_ACCOUNT_GIT}
+
+run_unrelease_with_devops: ## Gets Credentials from devops-repo and runs unrelease with them
+	$(eval info:= $(shell cat ${DEVOPS_ACCOUNT_DIR}/account_github.env | grep GITHUB_GH))
+	make unrelease $(info)
