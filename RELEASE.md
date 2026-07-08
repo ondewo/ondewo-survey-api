@@ -1,11 +1,12 @@
 # Release History
+
 *****************
 
 ## Release ONDEWO Survey Server API 2.0.0
 
 ### Improvements
 
- * Synchronize API Client Versions
+* Synchronize API Client Versions
 
 *****************
 
@@ -13,7 +14,7 @@
 
 ### Improvements
 
- * [[OND211-2039]](https://ondewo.atlassian.net/browse/OND211-2039) - added pre-commit hooks and adjusted files to them
+* [[OND211-2039]](https://ondewo.atlassian.net/browse/OND211-2039) - added pre-commit hooks and adjusted files to them
 
 *****************
 
@@ -21,7 +22,7 @@
 
 ### Improvements
 
- * Documentation Updated
+* Documentation Updated
 
 *****************
 
@@ -29,7 +30,7 @@
 
 ### Improvements
 
- * [[OND211-2039]](https://ondewo.atlassian.net/browse/OND211-2039) - Automated Release Process
+* [[OND211-2039]](https://ondewo.atlassian.net/browse/OND211-2039) - Automated Release Process
 
 *****************
 
@@ -37,66 +38,79 @@
 
 ### New Features
 
- * [[OND214-24]](https://ondewo.atlassian.net/browse/OND214-24) - Addition of the FHIR compatibility servicer
- * [[OND214-24]](https://ondewo.atlassian.net/browse/OND214-24) - Addition of the User Identifier to the UserInformation message
- * [[OND214-24]](https://ondewo.atlassian.net/browse/OND214-24) - Additional filters on GetSurveyAnswersRequest: "user_id" and "phone_number"
+* [[OND214-24]](https://ondewo.atlassian.net/browse/OND214-24) - Addition of the FHIR compatibility servicer
+* [[OND214-24]](https://ondewo.atlassian.net/browse/OND214-24) - Addition of the User Identifier to the UserInformation message
+* [[OND214-24]](https://ondewo.atlassian.net/browse/OND214-24) - Additional filters on GetSurveyAnswersRequest: "user_id" and "phone_number"
 
 *****************
+
 ## Release ONDEWO Survey Server API 0.5.0
 
 ### Improvements
 
- * [[OND214-14]](https://ondewo.atlassian.net/browse/OND214-14) - Add Agent Status
- * [[OND214-13]](https://ondewo.atlassian.net/browse/OND214-13) - Add user information to the extracted answers
+* [[OND214-14]](https://ondewo.atlassian.net/browse/OND214-14) - Add Agent Status
+* [[OND214-13]](https://ondewo.atlassian.net/browse/OND214-13) - Add user information to the extracted answers
 
 *****************
+
 ## Release ONDEWO Survey Server API 0.4.1
 
 ### Bug Fixes
- * [[OND214-7]](https://ondewo.atlassian.net/browse/OND214-7) - Add missing google proto dependencies
+
+* [[OND214-7]](https://ondewo.atlassian.net/browse/OND214-7) - Add missing google proto dependencies
 
 *****************
+
 ## Release ONDEWO Survey Server API 0.4.0
 
 ### Improvements
 
- * [[OND214-5]](https://ondewo.atlassian.net/browse/OND214-5) - CRUD support for Surveys
- * [[OND214-6]](https://ondewo.atlassian.net/browse/OND214-6) - Adapt to new API definition of NLU 3.x.x
+* [[OND214-5]](https://ondewo.atlassian.net/browse/OND214-5) - CRUD support for Surveys
+* [[OND214-6]](https://ondewo.atlassian.net/browse/OND214-6) - Adapt to new API definition of NLU 3.x.x
 
 *****************
+
 ## Release ONDEWO Survey Server API 0.3.0
 
 ### New Features
- * Survey. Add update survey endpoint with field mask support
+
+* Survey. Add update survey endpoint with field mask support
 
 ### Improvements
- * Questions. Add field 'value' to choices that represents the canonical value of the synonyms
+
+* Questions. Add field 'value' to choices that represents the canonical value of the synonyms
 
 ### Bug Fixes
- * Set protobuf syntax to proto 3
+
+* Set protobuf syntax to proto 3
 
 *****************
+
 ## Release ONDEWO Survey Server API 0.2.2
 
 ### Improvements
- * Updated README
+
+* Updated README
 
 *****************
+
 ## Release ONDEWO Survey Server API 0.2.1
 
 ### Bug fixes
- * Updated licenses.
+
+* Updated licenses.
 
 *****************
+
 ## Release ONDEWO Survey Server API 0.2.0
 
 ### New Features
 
- * Move to GitHub!
+* Move to GitHub!
 
 ### Improvements
 
- * No longer closed source.
+* No longer closed source.
 
 ### Bug fixes
 
@@ -106,7 +120,7 @@
 
 ### Migration Guide
 
- * [Replace submodule](https://stackoverflow.com/a/1260982/7756727) in the client.
+* [Replace submodule](https://stackoverflow.com/a/1260982/7756727) in the client.
 
 *****************
 
@@ -114,11 +128,11 @@
 
 ### New Features
 
- * Refactored individual project APIs into seperate repos.
+* Refactored individual project APIs into seperate repos.
 
 ### Improvements
 
- * Easier to develop independently.
+* Easier to develop independently.
 
 ### Bug fixes
 
@@ -126,10 +140,10 @@
 
 ### Known issues not covered in this release
 
- * Harder to install apis under one heading-- this will be addressed at a later date.
+* Harder to install apis under one heading-- this will be addressed at a later date.
 
 ### Migration Guide
 
- * [Replace submodule](https://stackoverflow.com/a/1260982/7756727) in the client.
+* [Replace submodule](https://stackoverflow.com/a/1260982/7756727) in the client.
 
 *****************
