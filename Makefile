@@ -122,8 +122,7 @@ githubio_logic: | githubio_logic_pre
 	@git branch | grep "*" | grep -q "master" || (echo "Not on master branch"  & rm -rf ondewo.github.io && exit 1)
 	@! cat ondewo.github.io/data.js | perl -ne "print if /name\: '${REPO_NAME_UPPER}'/../end\: ''/" | grep -q "number: '${ONDEWO_SURVEY_API_VERSION}'" || (echo "Already Released" && exit 1)
 	$(eval VERSION_LINE:= $(shell cat -n ondewo.github.io/data.js | perl -ne "print if /name\: '${REPO_NAME_UPPER}'/../end\: ''/" | grep "versions: " -A 1 | tail -1 | grep -o -E '[0-9]+' | head -1 | perl -pe 's/^0+//'))
-	$(eval TEMP_TEXT:= $(shell cat ondewo.github.io/script_object.txt | perl -pe "s/VERSION/${ONDEWO_SURVEY_API_VERSION}/g; s/TECHNOLOGY/${REPO_NAME}/g"))
-	@perl -i -pe 'print "${TEMP_TEXT}\n" if $$. == ${VERSION_LINE}' ondewo.github.io/data.js
+	@TEMP_TEXT="$$(cat ondewo.github.io/script_object.txt | perl -pe 's/VERSION/${ONDEWO_SURVEY_API_VERSION}/g; s/TECHNOLOGY/${REPO_NAME}/g')" perl -i -pe 'print "$$ENV{TEMP_TEXT}\n" if $$. == ${VERSION_LINE}' ondewo.github.io/data.js
 	@npm install prettier && cd ondewo.github.io && npx prettier -w --single-quote data.js
 	$(eval DOCS_DIR:=ondewo.github.io/docs/ondewo-${REPO_NAME}-api/${ONDEWO_SURVEY_API_VERSION})
 	@rm -rf ${DOCS_DIR}
@@ -131,9 +130,7 @@ githubio_logic: | githubio_logic_pre
 	@cp docs/* ${DOCS_DIR}
 	@perl -i -pe "s/h1>Protocol Documentation/h1>${REPO_NAME_UPPER} ${ONDEWO_SURVEY_API_VERSION} Documentation/" ${DOCS_DIR}/index.html
 	$(eval HEADER_LINE:= $(shell cat ${DOCS_DIR}/index.html | grep -n "${REPO_NAME_UPPER} ${ONDEWO_SURVEY_API_VERSION} Documentation" | grep -o -E '[0-9]+' | head -1 | perl -pe 's/^0+//'))
-	$(eval TEMP_IMG:= $(shell cat  ondewo.github.io/script_image.txt))
-	$(eval TEMP_CALC:= $(shell expr ${HEADER_LINE} ))
-	perl -i -pe 'print "${TEMP_IMG}\n" if $$. == ${TEMP_CALC}' ${DOCS_DIR}/index.html
+	@TEMP_IMG="$$(cat ondewo.github.io/script_image.txt)" perl -i -pe 'print "$$ENV{TEMP_IMG}\n" if $$. == ${HEADER_LINE}' ${DOCS_DIR}/index.html
 	head -30 ${DOCS_DIR}/index.html
 	cat ondewo.github.io/data.js | perl -ne "print if /name\: '${REPO_NAME_UPPER}'/../end\: ''/"
 	@git -C ondewo.github.io status
