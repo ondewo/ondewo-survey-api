@@ -165,3 +165,7 @@ cython_debug/
 
 .idea/
 .vscode/
+
+# Local docs-builder clone created by `make build_docs` (removed by `make clean_docs_builder`).
+# It is a nested git repo: leaving it untracked makes `git add -A` record a phantom gitlink.
+/.tmp-protoc-gen-doc-action/

@@ -160,3 +160,81 @@ Pre-commit here uses only the language-agnostic hooks — **markdownlint-cli2, p
 
 - **markdownlint MD053 is disabled** (its auto-fix deletes `[comment]: <>` reference-definition markers).
 - **markdownlint RELEASE.md reformatting is content-safe**: it only strips trailing whitespace and adds blank lines around headings — the `## Release … <VERSION>` headings and `*****` separators that `ondewo_release` greps for remain intact. (Confirmed: the 6.5.0 release notes sliced correctly after the reformat.)
+
+## GitHub Actions (`Generate API Documentation`) is a REQUIRED gate
+
+`.github/workflows/generate-doc-and-deploy.yaml` is the **only** workflow in this repo, and it is a gate, not a
+reporting job: it runs on every push and every PR against `master`, and its Deploy step **writes back to
+`master:docs`**. Treat a red run as blocking.
+
+The job has exactly three authored steps (`Set up job`, `Build …-action`, `Post Checkout` and `Complete job` are
+runner-generated):
+
+1. **`Checkout 🛎️`** — `actions/checkout@v5` with `submodules: true`.
+2. **`Generate documentation from ONDEWO proto files 🔧`** — `ondewo/ondewo-protoc-gen-doc-action@master`, a **Docker**
+   action (`FROM pseudomuto/protoc-gen-doc`) whose entrypoint is one `protoc` invocation per requested format:
+
+   ```bash
+   protoc -I. -Igoogleapis \
+     --doc_opt=/resources/templates/<fmt>.tmpl,index.<fmt> \
+     --doc_out=docs $(find ondewo -name '*.proto' | sort)
+   ```
+
+3. **`Deploy 🚀`** — `JamesIves/github-pages-deploy-action@v4`, `folder: docs` → `target-folder: docs` on `master`.
+
+### Reproducing it locally
+
+- **There is no `uv` / `ruff` / `mypy` / `pytest` step to reproduce, and no `pyproject.toml` or `uv.lock` to be stale
+  against.** This is a `.proto` + generated-docs repo with **zero** Python files; the fleet-standard
+  `uv run --frozen …` reproduction that the client SDK repos document simply does not exist here. Do not go looking
+  for it, and do not add one to make this repo "match" the others.
+- Step 2 — the only step that can actually fail on our content — is reproduced by `make build_docs`, which clones the
+  action repo, builds **the same `Dockerfile`/image the action builds**, and runs the same entrypoint args:
+
+  ```bash
+  make build_docs          # clone + docker build + generate html,md into docs/
+  git status --porcelain -- docs/   # MUST be empty: committed docs == regenerated docs
+  make clean_docs_builder  # drop the clone and the local image
+  ```
+
+- **Verify it non-vacuously.** `make build_docs` prints its cheerful `✓ Documentation generated` line whether or not
+  `protoc` did anything meaningful, and a no-op leaves the committed files in place, so "clean `git status`" alone
+  proves nothing. Delete the outputs first and require them to come back byte-identical:
+
+  ```bash
+  rm -f docs/index.html docs/index.md docs/style.css && make build_docs && git status --porcelain -- docs/
+  ```
+
+  Confirmed at `995d193`: all three files regenerate with identical checksums.
+- **Step 3 cannot be run here at all** — it needs GitHub Pages and the runner's `GITHUB_TOKEN`. The step even carries
+  `if: ${{ !env.ACT }}` so it self-skips under `act`. Do not claim it "passes locally"; it is unreproducible off the
+  runner, and its correctness is only ever observed in a real run.
+- Ask the API what actually happened rather than guessing; there is no `gh` CLI on this machine:
+
+  ```bash
+  SHA=$(git rev-parse HEAD)
+  curl -s "https://api.github.com/repos/ondewo/ondewo-survey-api/actions/runs?head_sha=$SHA"
+  curl -s "https://api.github.com/repos/ondewo/ondewo-survey-api/actions/runs/<run_id>/jobs"
+  ```
+
+  The `/jobs` call is the one worth making: it prints a per-step `conclusion`, which is what distinguishes "the docs
+  step passed" from "the whole run was skipped".
+
+### Sharp edges found while running it
+
+- **`submodules: true` on the checkout is currently INERT.** There is no `.gitmodules` and not one gitlink
+  (`git ls-files -s | awk '$1=="160000"'` is empty); `googleapis/` is **690 ordinary tracked files**, vendored. So
+  `-Igoogleapis` works because those files are in the commit, _not_ because a submodule was initialised — and a fresh
+  clone needs no `--recursive`. Do not read that flag as evidence that `googleapis/` is a submodule.
+- **`google/protobuf/{empty,field_mask,struct}.proto` are NOT in this repo.** They resolve from the well-known types
+  bundled inside the `pseudomuto/protoc-gen-doc` image. Only `google/api/annotations.proto` (from `googleapis/`) and
+  `ondewo/survey/survey.proto` (from `-I.`) come from the checkout, so grepping the repo for a missing import will
+  mislead you about which include path is at fault.
+- **CI OVERWRITES `docs/`, so a hand-edit there is silently reverted.** The Deploy step pushes the regenerated folder
+  back onto `master`, which is the same reason pre-commit carries `exclude: '^(docs/|googleapis/)'`. If the rendered
+  documentation is wrong, fix the `.proto` comments — never `docs/index.md`.
+- **Both actions float on a moving ref** (`…-doc-action@master`, `github-pages-deploy-action@v4`). A green run is
+  evidence about the bits that ran that day, not about the bits that will run tomorrow; when the docs step breaks with
+  no change on our side, check the action before the protos.
+- `make build_docs` leaves a full nested git repo at `.tmp-protoc-gen-doc-action/`. It is now gitignored — untracked,
+  it made `git add -A` record a phantom gitlink. Prefer `make clean_docs_builder` when you are done.
