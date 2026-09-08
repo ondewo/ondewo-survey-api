@@ -19,7 +19,7 @@ fail_fast: false
 repos:
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.23.0
+    rev: v0.23.2
     hooks:
       - id: markdownlint-cli2
 
@@ -38,6 +38,16 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
 
+  # ORDER IS LOAD-BEARING: conventional-pre-commit MUST run BEFORE giticket. Both are commit-msg hooks and
+  # pre-commit runs repos in declaration order. giticket rewrites the subject to "[OND231-624] feat: ...",
+  # which is no longer a valid Conventional Commit - so with giticket first, every commit on a branch matching
+  # giticket's regex is rewritten and then rejected by the very next hook. Never swap these two.
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [ commit-msg ]
+
   - repo: https://github.com/milin/giticket
     rev: '1.92'
     hooks:
@@ -45,9 +55,3 @@ repos:
         args: [ '--regex=(?:(?:feature|bugfix|support|hotfix)/)?(OND[0-9]{3}-[0-9]{1,5})[_-][\w-]+',
                 '--format=[{ticket}] {commit_msg}',
                 '--mode=regex_match' ]
-
-  - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.4.0
-    hooks:
-      - id: conventional-pre-commit
-        stages: [ commit-msg ]
