@@ -20,8 +20,12 @@ ONDEWO_SURVEY_API_VERSION=2.0.0
 # You need to setup an access token at https://github.com/settings/tokens - permissions are important
 GITHUB_GH_TOKEN?=ENTER_YOUR_TOKEN_HERE
 
+# Terminate on the ***** separator that delimits release entries, NOT on /\*\*/ - that matched the first
+# markdown **bold** span inside the entry and silently truncated the notes there. It is correct today only
+# because no entry yet uses inline bold; the moment one does, every line after it is dropped from
+# `gh release create -n "$(CURRENT_RELEASE_NOTES)"` with no error at all.
 CURRENT_RELEASE_NOTES=`cat RELEASE.md \
-	| perl -ne 'print if /Release ONDEWO Survey Server API ${ONDEWO_SURVEY_API_VERSION}/../\*\*/'`
+	| perl -ne 'print if /Release ONDEWO Survey Server API ${ONDEWO_SURVEY_API_VERSION}/../^\*{5}/'`
 
 GH_REPO="https://github.com/ondewo/ondewo-survey-api"
 DEVOPS_ACCOUNT_GIT="ondewo-devops-accounts"
@@ -196,9 +200,22 @@ release_all_clients: ## Release all clients IN PARALLEL; one failing client does
 
 GENERIC_CLIENT?=
 RELEASEMD?=
-GENERIC_RELEASE_NOTES="\n***************** \n\\\#\\\# Release ONDEWO Survey REPONAME Client ${ONDEWO_SURVEY_API_VERSION} \n \
-	\n\\\#\\\#\\\# Improvements \n \
-	* Tracking API Version [${ONDEWO_SURVEY_API_VERSION}](https://github.com/ondewo/ondewo-survey-api/releases/tag/${ONDEWO_SURVEY_API_VERSION}) ( [Documentation](https://ondewo.github.io/ondewo-survey-api/) ) \n"
+# The section heading is driven by GENERIC_RELEASE_SECTION so a breaking API release does not publish five
+# client majors under "Improvements". On a major bump, override it and describe the break:
+#   make release_all_clients GENERIC_RELEASE_SECTION='Breaking Changes' \
+#     GENERIC_RELEASE_EXTRA='* `<Message>` is renamed to `<NewMessage>`.\n'
+GENERIC_RELEASE_SECTION?=Improvements
+GENERIC_RELEASE_EXTRA?=
+# Emitted markdownlint-clean, and deliberately on ONE line. Every ` \n` used to leave a trailing space on
+# each generated line and a leading space on the list item, and make's line-continuation collapses
+# `\<newline><tab>` to a further space, so the block tripped MD009/MD007/MD022/MD012/MD032 in EVERY client
+# and the first pre-commit run of every release `Failed - files were modified by this hook` (10 auto-fixes
+# in the Python client, measured on a lint-clean RELEASE.md). It self-healed on the re-run, but it also
+# left the heading as `\#\# Release ... <VERSION> ` WITH a trailing space, which the release_client guard
+# below cannot match because that grep anchors on `$$` - so the duplicate-entry guard would only ever have
+# matched entries a previous markdownlint run had already stripped. Keep this byte-identical to what
+# markdownlint normalises to: no trailing spaces, a blank line around the heading and around the list.
+GENERIC_RELEASE_NOTES=\n*****************\n\n\\\#\\\# Release ONDEWO Survey REPONAME Client ${ONDEWO_SURVEY_API_VERSION}\n\n\\\#\\\#\\\# ${GENERIC_RELEASE_SECTION}\n\n* Tracking API Version [${ONDEWO_SURVEY_API_VERSION}](https://github.com/ondewo/ondewo-survey-api/releases/tag/${ONDEWO_SURVEY_API_VERSION}) ( [Documentation](https://ondewo.github.io/ondewo-survey-api/) )\n${GENERIC_RELEASE_EXTRA}
 
 release_client:
 	$(eval REPO_NAME:= $(shell echo ${GENERIC_CLIENT} | cut -d "-" -f 4 | cut -d '.' -f 1))
@@ -210,13 +227,31 @@ release_client:
 	rm -rf ${REPO_DIR}
 	rm -f build_log_${REPO_NAME}.txt
 
-	@echo ${GENERIC_RELEASE_NOTES} > temp-notes-${REPO_NAME} && perl -i -pe 's/\\//g' temp-notes-${REPO_NAME} && perl -i -pe 's/REPONAME/${UPPER_REPO_NAME}/g' temp-notes-${REPO_NAME}
+	@# printf '%b', not echo: echo appends a newline of its own on top of the trailing \n, which left a
+	@# second blank line before the previous entry's separator (markdownlint MD012 used to eat it).
+	@# Read through the environment (line 1 is a bare `export`) rather than interpolating the value into
+	@# the command text: the value used to carry its own double quotes, so a backtick in
+	@# GENERIC_RELEASE_EXTRA would be command-substituted by the shell before printf ever saw it.
+	@# The final perl normalises the file to exactly ONE trailing newline: printf '%b' adds none, so a
+	@# GENERIC_RELEASE_EXTRA that does not end in \n would leave the file without a final newline, and the
+	@# insert below would then swallow the blank line before the next ***** separator (MD032).
+	@printf '%b' "$$GENERIC_RELEASE_NOTES" > temp-notes-${REPO_NAME} && perl -i -pe 's/\\//g' temp-notes-${REPO_NAME} && perl -i -pe 's/REPONAME/${UPPER_REPO_NAME}/g' temp-notes-${REPO_NAME} && perl -0777 -i -pe 's/\n*\z/\n/' temp-notes-${REPO_NAME}
 	git clone ${GENERIC_CLIENT}
 # Check if Client is already uptodate with API Version
 	@! git -C ${REPO_DIR} branch -a | grep -q ${ONDEWO_SURVEY_API_VERSION} || (echo "Already Released ${ONDEWO_SURVEY_API_VERSION} \n\n\n"  && touch .already_released_marker-${REPO_NAME} && rm -rf ${REPO_DIR} && rm -f temp-notes-${REPO_NAME} && exit 1)
 
 # Change Version Number and RELEASE NOTES
-	cd ${REPO_DIR} && perl -i -ne 'print; if(/Release History/){open my $$fh,"<","../temp-notes-${REPO_NAME}"; print while <$$fh>; close $$fh}' ${RELEASEMD}
+# Only insert the generated boilerplate when the client does not already document this version. A client
+# whose RELEASE.md was written by hand ahead of the release would otherwise get a SECOND
+# "Release ONDEWO Survey <Name> Client <VERSION>" heading, which buries the curated entry (the notes slice
+# takes the FIRST match) and trips markdownlint MD025/MD024 - neither of which auto-fixes, so the client's
+# own pre-commit fails the build and the release aborts. ondewo-nlu-client-angular carries two
+# byte-identical "## Release ONDEWO NLU Angular Client 3.5.0" blocks from exactly this failure.
+	cd ${REPO_DIR} && if grep -qE "^#+ Release ONDEWO Survey ${UPPER_REPO_NAME} Client ${ONDEWO_SURVEY_API_VERSION}$$" ${RELEASEMD}; then \
+		echo "${RELEASEMD} already documents ${ONDEWO_SURVEY_API_VERSION} - keeping the curated entry, not inserting the generated notes"; \
+	else \
+		perl -i -ne 'print; if(/Release History/){open my $$fh,"<","../temp-notes-${REPO_NAME}"; print while <$$fh>; close $$fh}' ${RELEASEMD}; \
+	fi
 	cd ${REPO_DIR} && head -20 ${RELEASEMD}
 	cd ${REPO_DIR} && perl -i -pe 's/ONDEWO_SURVEY_VERSION.*=.*/ONDEWO_SURVEY_VERSION=${ONDEWO_SURVEY_API_VERSION}/' Makefile
 	cd ${REPO_DIR} && perl -i -pe 's/ONDEWO_PROTO_COMPILER_GIT_BRANCH.*=.*/ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags\/${PROTO_COMPILER}/' Makefile
