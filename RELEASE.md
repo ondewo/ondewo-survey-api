@@ -2,6 +2,18 @@
 
 *****************
 
+## Release ONDEWO Survey Server API 2.0.1
+
+### Improvements
+
+* [[OND211-2333]](https://ondewo.atlassian.net/browse/OND211-2333) - Document every service, RPC, message and field in `survey.proto` and `fhir.proto` (HTML-formatted comments for the generated API documentation; trailing inline field comments moved into the field documentation). Comment-only: no service, RPC, message, field or field number changed, so the API is wire-compatible with 2.0.0
+* Add `make build_docs` / `make clean_docs_builder` to reproduce the documentation workflow locally, and `unrelease` targets to undo a release (GitHub release, release branch and tag)
+* Release tooling: the release-notes slice ends at the `*****` separator instead of the first `**`; `release_all_clients` runs the clients in parallel, isolates per-client failures and fails loudly instead of reporting them as already released; the generated client release notes are markdownlint-clean and are not inserted twice; secret values are masked in echoed recipe lines; `update_githubio` no longer corrupts `data.js`
+* Utils Docker image on `python:3.12-slim`, portable (GNU/BSD) Makefile edits with `perl` instead of `sed`, `actions/checkout@v5` in the documentation workflow
+* Pre-commit: language-agnostic hook set (markdownlint-cli2, pre-commit-hooks, conventional-pre-commit before giticket)
+
+*****************
+
 ## Release ONDEWO Survey Server API 2.0.0
 
 ### Improvements
