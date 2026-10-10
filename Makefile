@@ -170,7 +170,7 @@ create_release_tag: ## Create Release Tag and push it to origin
 	git push origin ${ONDEWO_SURVEY_API_VERSION}
 
 login_to_gh: ## Login to Github CLI with Access Token
-	@echo $(GITHUB_GH_TOKEN) | gh auth login -p ssh --with-token
+	@printf '%s\n' "$${GITHUB_GH_TOKEN}" | gh auth login -p ssh --with-token
 
 build_gh_release: ## Generate Github Release with CLI
 	gh release create --repo $(GH_REPO) "$(ONDEWO_SURVEY_API_VERSION)" -n "$(CURRENT_RELEASE_NOTES)" -t "Release ${ONDEWO_SURVEY_API_VERSION}"
@@ -312,7 +312,7 @@ push_to_gh: login_to_gh build_gh_release ## Logs into GitHub CLI and Releases
 
 release_to_github_via_docker_image: ## Release to Github via docker
 	@docker run --rm \
-		-e GITHUB_GH_TOKEN=${GITHUB_GH_TOKEN} \
+		-e GITHUB_GH_TOKEN \
 		${IMAGE_UTILS_NAME} make push_to_gh
 
 ########################################################
@@ -325,9 +325,13 @@ clone_devops_accounts: ## Clones devops-accounts repo
 	@if [ -d $(DEVOPS_ACCOUNT_GIT) ]; then rm -Rf $(DEVOPS_ACCOUNT_GIT); fi
 	git clone git@bitbucket.org:ondewo/${DEVOPS_ACCOUNT_GIT}.git
 
+# The token is loaded into the sub-make's ENVIRONMENT (anchored to the definition line). `make release
+# NAME=<value>` would put it on make's argv, which /proc/<pid>/cmdline shows to every user on the host.
 run_release_with_devops: ## Gets Credentials from devops-repo and runs release with them
-	$(eval info:= $(shell cat ${DEVOPS_ACCOUNT_DIR}/account_github.env | grep GITHUB_GH))
-	@make release $(info)
+	@set -a \
+		&& eval "$$(grep -h -E '^GITHUB_GH_TOKEN=' ${DEVOPS_ACCOUNT_DIR}/account_github.env)" \
+		&& set +a \
+		&& $(MAKE) release
 
 spc: ## Checks if the Release Branch, Tag and Pypi version already exist
 	$(eval filtered_branches:= $(shell git branch --all | grep "release/${ONDEWO_SURVEY_API_VERSION}"))
@@ -350,12 +354,16 @@ delete_gh_release: ## Delete GitHub Release, release branch and release tag via 
 
 unrelease_to_github_via_docker_image: ## Execute unrelease through Docker container
 	@docker run --rm \
-		-e GITHUB_GH_TOKEN=${GITHUB_GH_TOKEN} \
+		-e GITHUB_GH_TOKEN \
 		${IMAGE_UTILS_NAME} make delete_gh_release
 
 ondewo_unrelease: clone_devops_accounts run_unrelease_with_devops ## Unrelease with credentials from devops-accounts repo
 	@rm -rf ${DEVOPS_ACCOUNT_GIT}
 
+# The token is loaded into the sub-make's ENVIRONMENT (anchored to the definition line). `make unrelease
+# NAME=<value>` would put it on make's argv, which /proc/<pid>/cmdline shows to every user on the host.
 run_unrelease_with_devops: ## Gets Credentials from devops-repo and runs unrelease with them
-	$(eval info:= $(shell cat ${DEVOPS_ACCOUNT_DIR}/account_github.env | grep GITHUB_GH))
-	@make unrelease $(info)
+	@set -a \
+		&& eval "$$(grep -h -E '^GITHUB_GH_TOKEN=' ${DEVOPS_ACCOUNT_DIR}/account_github.env)" \
+		&& set +a \
+		&& $(MAKE) unrelease
