@@ -258,9 +258,9 @@ release_client:
 		perl -i -ne 'print; if(/Release History/){open my $$fh,"<","../temp-notes-${REPO_NAME}"; print while <$$fh>; close $$fh}' ${RELEASEMD}; \
 	fi
 	cd ${REPO_DIR} && head -20 ${RELEASEMD}
-	cd ${REPO_DIR} && perl -i -pe 's/ONDEWO_SURVEY_VERSION.*=.*/ONDEWO_SURVEY_VERSION=${ONDEWO_SURVEY_API_VERSION}/' Makefile
-	cd ${REPO_DIR} && perl -i -pe 's/ONDEWO_PROTO_COMPILER_GIT_BRANCH.*=.*/ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags\/${ONDEWO_PROTO_COMPILER_VERSION}/' Makefile
-	cd ${REPO_DIR} && perl -i -pe 's/SURVEY_API_GIT_BRANCH.*=.*/SURVEY_API_GIT_BRANCH=tags\/${ONDEWO_SURVEY_API_VERSION}/' Makefile && head -30 Makefile
+	cd ${REPO_DIR} && perl -i -pe 's/^ONDEWO_SURVEY_VERSION\s*=.*/ONDEWO_SURVEY_VERSION=${ONDEWO_SURVEY_API_VERSION}/' Makefile
+	cd ${REPO_DIR} && perl -i -pe 's/^ONDEWO_PROTO_COMPILER_GIT_BRANCH\s*=.*/ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags\/${ONDEWO_PROTO_COMPILER_VERSION}/' Makefile
+	cd ${REPO_DIR} && perl -i -pe 's/^((ONDEWO_)?SURVEY_API_GIT_BRANCH)\s*=.*/$$1=tags\/${ONDEWO_SURVEY_API_VERSION}/' Makefile && head -30 Makefile
 
 # Build new code
 	bash -c 'set -o pipefail; make -C ${REPO_DIR} ondewo_release | tee build_log_${REPO_NAME}.txt'
