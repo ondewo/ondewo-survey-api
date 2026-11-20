@@ -2,6 +2,18 @@
 
 *****************
 
+## Release ONDEWO Survey Server API 2.1.0
+
+### Improvements
+
+* [[OND236-120]](https://ondewo.atlassian.net/browse/OND236-120) - The clients are generated with ondewo-proto-compiler 5.17.0 (protoc 35.1), pinned explicitly in `ONDEWO_PROTO_COMPILER_VERSION` instead of "the first tag the GitHub API returned". No service, RPC, message or field changed. The generated code requires these runtime floors:
+  * Python: `protobuf>=7.35.1,<8` and `grpcio>=1.85.1`, Python >= 3.10; the Python client no longer declares `grpcio-tools`, `grpcio-reflection` or `mypy-protobuf` as runtime dependencies
+  * js, typescript: `grpc-web` 2.1.1 and `google-protobuf` ^4.0.3; grpc-web 2.1.1 limits a response to 4 MB by default (set `maxReceiveMessageSize` to receive more)
+  * Angular: `"grpc-web": "2.1.1"` as an exact direct dependency plus `"overrides": { "grpc-web": "$grpc-web" }`, `@ngx-grpc/*` ~3.1.2, `google-protobuf` ~3.21.4
+  * Nodejs: `@grpc/grpc-js` 1.14.7 and `google-protobuf` 3.21.4
+
+*****************
+
 ## Release ONDEWO Survey Server API 2.0.1
 
 ### Improvements
