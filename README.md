@@ -17,6 +17,12 @@ For an end-user, the APIs in this repo function mostly as documentation for the 
 * [JavaScript](https://github.com/ondewo/ondewo-survey-client-javascript)
 * [TypeScript](https://github.com/ondewo/ondewo-survey-client-typescript)
 * [NodeJS](https://github.com/ondewo/ondewo-survey-client-nodejs)
+* [C++](https://github.com/ondewo/ondewo-survey-client-cpp)
+* [C#](https://github.com/ondewo/ondewo-survey-client-csharp)
+* [Go](https://github.com/ondewo/ondewo-survey-client-go)
+* [Java](https://github.com/ondewo/ondewo-survey-client-java)
+* [PHP](https://github.com/ondewo/ondewo-survey-client-php)
+* [Rust](https://github.com/ondewo/ondewo-survey-client-rust)
 
 Please note that some of these implementations are works-in-progress. The repo will make clear the status of the implementation.
 
@@ -89,28 +95,88 @@ TODOs after Pull Request was merged in:
    >make ondewo_release
 
 ---
-The `make ondewo_release` command can be divided into 5 steps:
+The `make ondewo_release` command can be divided into 4 steps:
 
-* cloning the devops-accounts repository and extracting the credentials
+* cloning the devops-accounts repository into a private temporary directory, reading the GitHub token
+  into the environment and deleting the clone (`scripts/with_devops_accounts.sh --github-token`)
 * creating and pushing the release branch
 * creating and pushing the release tag
 * creating the GitHub release
 
 The variable for the GitHub Access Token is inside the Makefile, but the value is overwritten during
-`make ondewo_release`, because it is passed from the devops-accounts repo as an argument to the actual `release` command.
+`make ondewo_release`, because it is passed from the devops-accounts repo in the environment of the actual
+`release` command (never on its command line).
 
 ## Automatic Release Process - Clients
 
-Every available Client of this API can be released from this repository, to make the release process for major and minor changes easier.
+All eleven `ondewo-survey-client-<language>` SDKs (`CLIENTS` in the Makefile: python nodejs typescript
+angular js cpp csharp go java php rust) are released from this repository, after the API itself, by one
+driver, `scripts/release_client.sh`:
 
-The generic `release_client` command depends on 4 variables:
+```bash
+make preflight_all_clients                  # read-only: every client's preflight, serially
+make release_all_clients                    # preflight_all_clients, then all clients in parallel
+make preflight_client CLIENT=python         # one client's preflight (likewise preflight_<language>_client)
+make release_client CLIENT=python           # one client (likewise release_<language>_client)
+```
+
+What `release_all_clients` does:
+
+1. Clones ondewo-devops-accounts **once** into a private `mktemp -d` directory outside every
+   repository (`scripts/with_devops_accounts.sh`) and hands each client its own copy as
+   `DEVOPS_ACCOUNT_DIR`; every copy and the clone are deleted on every exit path, Ctrl-C included.
+2. Runs `preflight_all_clients`. **A single failing preflight stops the run before any client is
+   released.**
+3. Releases the clients in parallel, each into a fresh `release_run_<language>.log`, and prints a
+   `RELEASED` / `SKIP` / `INCOMPLETE` / `FAILED` summary. One failing client does not abort the others;
+   the run fails if any client is not `RELEASED` or `SKIP`.
+
+For every client, in preflight and release alike, the driver clones the client, inserts the generated
+release notes into its `RELEASE.md` (`src/RELEASE.md` for nodejs, typescript, angular and js) unless it
+already documents the version, and rewrites the anchored `ONDEWO_SURVEY_VERSION=`,
+`ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags/<ONDEWO_PROTO_COMPILER_VERSION>` and `(ONDEWO_)SURVEY_API_GIT_BRANCH=`
+assignments of its Makefile. The client families spell the product differently in their headings --
+`## Release ONDEWO Survey <Name> Client <version>` in python and the js family,
+`## Release ONDEWO SURVEY <Name> Client <version>` in cpp, csharp, go, java, php and rust (`<Name>` is the
+capitalised language, except `C++` and `PHP`). The generated heading takes the spelling of the client's own
+newest entry, and an entry for the version in EITHER spelling counts as "already documented", so a client
+never gets a second entry. Then the client's Makefile and what origin already has decide.
+
+A **contract** client has the read-only targets `release_preflight` (credentials valid, version new on
+origin and registry) and `release_verify` (tag, GitHub release and registry serve the version):
+
+| On the client's origin | Result |
+| --- | --- |
+| tag `<version>` and `release_verify` passes | **SKIP**: already released and verified |
+| tag `<version>` but `release_verify` fails | **INCOMPLETE**: a half-finished release; finish it by hand |
+| branch `release/<version>` but no tag | **INCOMPLETE**: a half-finished release; finish or undo it by hand |
+| neither | preflight: `release_preflight`; release: `ondewo_release`, then `release_verify` |
+
+A **legacy** client has neither target -- every survey client today. It is released exactly as before,
+through its own `ondewo_release` (which clones the devops accounts itself) followed by `make TEST`, and
+the GitHub release `<version>`, which its `ondewo_release` creates last, tells the states apart:
+
+| On the client's origin | Result |
+| --- | --- |
+| tag or `release/<version>`, GitHub release published (HTTP 200) | **SKIP**: already released |
+| tag or `release/<version>`, no GitHub release (HTTP 404) | **INCOMPLETE**: a half-finished release |
+| tag or `release/<version>`, any other answer (403/429 rate limit) | **FAILED**: nothing changed, re-run later |
+| neither | preflight: the driver's own checks only; release: `ondewo_release`, `TEST`, then the GitHub release must appear |
+
+A client with only one of `release_preflight` / `release_verify` fails with that message. The client
+clone is removed on every exit path; files a client container wrote as root are removed through a
+digest-pinned busybox container, never `sudo`. The proto compiler is pinned exactly in
+`ONDEWO_PROTO_COMPILER_VERSION`; move it deliberately.
+
+The generated notes come from these variables:
 
 * `ONDEWO_SURVEY_API_VERSION` -- Current API version
-* `GENERIC_CLIENT` -- specifies `SSH git link` to client-repository
-* `RELEASEMD` -- position of `RELEASE.md` inside the client-repository
 * `GENERIC_RELEASE_NOTES` -- template text of client release notes
+* `GENERIC_RELEASE_SECTION` -- heading the generated notes are filed under (default `Improvements`)
+* `GENERIC_RELEASE_EXTRA` -- optional extra bullet appended to the generated notes
 
-To release all clients in sequence, use the `make release_all_clients` command.
+`python3 scripts/test_release_driver.py` runs the real Makefile and driver against fake client and devops
+repositories (nothing is cloned from or published to anywhere).
 
 ## Proto Documentation
 

@@ -151,8 +151,32 @@ Raises:
 
 ## Client-release orchestration (`release_all_clients`)
 
-- It **fails loudly** on a genuine client-release error: the piped sub-make runs under `bash -c 'set -o pipefail; make -C … | tee …'` (a plain sh pipe returns tee's 0 and masks failures), and a **marker file** distinguishes an "already released" SKIP from a real FAILURE (make flattens recipe exit codes to 2, so the code alone can't tell them apart). Do not regress either.
-- Every token-bearing recipe line is `@`-prefixed so make never echoes a secret — `docker run -e <TOKEN>`, `echo $(TOKEN) | gh auth`, `twine … -p${PYPI_PASSWORD}`, and the credential sub-make `make release $(info)` (which expands the token at runtime and is easy to miss).
+- **All eleven clients go through ONE driver, `scripts/release_client.sh`** (ported from ondewo-s2t-api /
+  ondewo-t2s-api). `CLIENTS` lists python nodejs typescript angular js cpp csharp go java php rust; `make
+  preflight_client CLIENT=<x>` / `make release_client CLIENT=<x>` (or `preflight_<x>_client` /
+  `release_<x>_client`) run one, `preflight_all_clients` / `release_all_clients` all of them, the latter only
+  after every preflight passed. A CONTRACT client (`release_preflight` + `release_verify`) is SKIP only when its
+  tag exists AND `release_verify` passes; a LEGACY client (neither target, every survey client today) runs its
+  own `ondewo_release` and `TEST` as before, and the published GitHub release decides SKIP (200), INCOMPLETE
+  (404) or FAILED (anything else). A half-finished release is INCOMPLETE, never SKIP.
+- **The product is spelled two ways, and the duplicate-entry guard accepts both.** python and the js family
+  write `## Release ONDEWO Survey <Name> Client <v>`, cpp/csharp/go/java/php/rust `## Release ONDEWO SURVEY
+  <Name> Client <v>`. The old guard grepped `ONDEWO Survey` only, so a release of an uppercase client would
+  have inserted a SECOND entry for a version it already documented (MD024, which does not auto-fix). The
+  template carries `PRODUCTNAME`, which the driver fills with the spelling of the client's newest entry
+  (default `Survey`). Pinned by `test_an_entry_in_either_product_spelling_is_kept_and_never_duplicated`.
+- **No bare `export`.** Only `RELEASE_NOTES_TEMPLATE` is exported, and only to `preflight_client` /
+  `release_client`; the driver also unsets every command-line variable of the driver make before a client
+  target runs.
+- It **fails loudly**: the driver runs under `set -euo pipefail`, and marker files
+  (`.already_released_marker-<client>`, `.incomplete_marker-<client>`) tell SKIP and INCOMPLETE apart from a real
+  FAILURE (make flattens recipe exit codes to 2).
+- Every token-bearing recipe line is `@`-prefixed so make never echoes a secret. Credentials come from
+  `scripts/with_devops_accounts.sh`: one devops-accounts clone per run in a private `mktemp -d` (never in this
+  checkout), removed on every exit path; `--github-token` (this repo's own `ondewo_release`) reads the token into
+  the sub-make's environment and deletes the clone first.
+- `python3 scripts/test_release_driver.py` runs the real Makefile and driver against fake clients and is the
+  fastest check of a change; the release-hygiene workflow runs it too.
 
 ## Pre-commit upgraded (language-agnostic hook set)
 
@@ -293,7 +317,6 @@ the release reads. Keep `src/RELEASE.md` in step by hand if it exists.
 
 `make release` in this repo runs:
 
-
 The **npm publish happens LAST**. So a failure before it means nothing shipped, but the
 branch, tag and GitHub release may already exist — and `spc` will then refuse a re-run. Recover
 by running only the remaining step, not the whole target.
@@ -373,7 +396,6 @@ cat RELEASE.md | perl -ne 'print if /<the exact heading> <version>/../^\*{5}/' |
 GitHub's release API returned 500 twice in one session, leaving the registry and the tag correct and
 **no release object at all** (nlu-client-js and -angular 7.1.1); `gh release create` after the fact
 repairs it without touching the artefact.
-
 
 ```bash
 git tag --list <version> ; gh release view <version> --json body --jq '.body|length'
