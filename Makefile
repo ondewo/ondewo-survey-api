@@ -1,4 +1,3 @@
-export
 # ---------------- BEFORE RELEASE ----------------
 # 1 - Update Version Number
 # 2 - Update RELEASE.md
@@ -28,8 +27,6 @@ CURRENT_RELEASE_NOTES=`cat RELEASE.md \
 	| perl -ne 'print if /Release ONDEWO Survey Server API ${ONDEWO_SURVEY_API_VERSION}/../^\*{5}/'`
 
 GH_REPO="https://github.com/ondewo/ondewo-survey-api"
-DEVOPS_ACCOUNT_GIT="ondewo-devops-accounts"
-DEVOPS_ACCOUNT_DIR="./${DEVOPS_ACCOUNT_GIT}"
 IMAGE_UTILS_NAME=ondewo-survey-api-utils:${ONDEWO_SURVEY_API_VERSION}
 .DEFAULT_GOAL := help
 
@@ -158,6 +155,15 @@ update_githubio:
 ########################################################
 #		Release
 
+# ORDER IS LOAD-BEARING AND MAKE ONLY GUARANTEES IT SERIALLY, hence the `.NOTPARALLEL:` below.
+# Prerequisites are made left to right under a serial make, but `make -j` is free to run them
+# concurrently and in any order: the GitHub release could be created before the tag it names was pushed,
+# and preflight_all_clients could run beside, or after, the client releases it exists to gate
+# (release_all_clients_after_preflight). `.NOTPARALLEL:` with no prerequisites restores the listed order
+# on every make version; the targeted `.NOTPARALLEL: release` needs make >= 4.4 and silently means the
+# bare form on 4.3. Nothing in this makefile is written to be parallel-safe, so it costs nothing.
+.NOTPARALLEL:
+
 release: create_release_branch create_release_tag build_and_release_to_github_via_docker ## Automate the entire release process
 	@echo "Release Finished"
 
@@ -175,8 +181,6 @@ login_to_gh: ## Login to Github CLI with Access Token
 build_gh_release: ## Generate Github Release with CLI
 	gh release create --repo $(GH_REPO) "$(ONDEWO_SURVEY_API_VERSION)" -n "$(CURRENT_RELEASE_NOTES)" -t "Release ${ONDEWO_SURVEY_API_VERSION}"
 
-CLIENTS := python nodejs typescript angular js
-
 # The ondewo-proto-compiler every client is built with, pinned EXACTLY and written into each client's
 # ONDEWO_PROTO_COMPILER_GIT_BRANCH as tags/<version>. It used to be "the first tag the GitHub API
 # returned": unauthenticated (60 requests/hour, so a rate-limited run wrote an empty `tags/`), in an
@@ -184,12 +188,74 @@ CLIENTS := python nodejs typescript angular js
 # deliberately.
 ONDEWO_PROTO_COMPILER_VERSION=5.17.0
 
-release_all_clients: ## Release all clients IN PARALLEL; one failing client does not abort the others
-	@echo "Releasing all clients in parallel for ${ONDEWO_SURVEY_API_VERSION} ..."; \
-	rm -f .already_released_marker-* .client_status-*; \
+# Every published ondewo-survey-client-<language> SDK. scripts/release_client.sh drives all eleven alike. A
+# client that implements the release contract (`release_preflight`: read-only, credentials valid, version
+# new on origin and registry; `release_verify`: read-only, tag, GitHub release and registry serve the
+# version) is preflighted and verified through it; a LEGACY client without those two targets (every survey
+# client today) is released through its own `ondewo_release` exactly as before, and the published GitHub
+# release <version> tells SKIP, INCOMPLETE and RELEASED apart (see the header of scripts/release_client.sh).
+CLIENTS := python nodejs typescript angular js cpp csharp go java php rust
+
+CLIENT_GIT_URL_PREFIX?=git@github.com:ondewo/ondewo-survey-client-
+# The RELEASE.md a client's release slices its notes from (the js family keeps it in src/).
+CLIENT_RELEASE_MD=$(if $(filter nodejs typescript angular js,$(1)),src/RELEASE.md,RELEASE.md)
+# How the client's RELEASE.md headings spell the language: capitalised name, except "C++" and "PHP".
+CLIENT_DISPLAY_NAME_cpp=C++
+CLIENT_DISPLAY_NAME_php=PHP
+CLIENT_DISPLAY_NAME=$(or $(CLIENT_DISPLAY_NAME_$(1)),$(shell printf '%s' '$(1)' | perl -pe 's/^(.)/\u$$1/'))
+
+# The section heading is driven by GENERIC_RELEASE_SECTION so a breaking API release does not publish every
+# client major under "Improvements". On a major bump, override it and describe the break:
+#   make release_all_clients GENERIC_RELEASE_SECTION='Breaking Changes' \
+#     GENERIC_RELEASE_EXTRA='* `<Message>` is renamed to `<NewMessage>`.\n'
+GENERIC_RELEASE_SECTION?=Improvements
+GENERIC_RELEASE_EXTRA?=
+# Emitted markdownlint-clean, and deliberately on ONE line. Every ` \n` used to leave a trailing space
+# on each generated line and a leading space on the list item, and make's line-continuation collapses
+# `\<newline><tab>` to a further space, so the block tripped MD009/MD007/MD022/MD012/MD032 in EVERY
+# client and the first pre-commit run of every release `Failed - files were modified by this hook` (10
+# auto-fixes in the Python client, measured on a lint-clean RELEASE.md). It self-healed on the re-run, but it also left the
+# heading as `\#\# Release ... <VERSION> ` WITH a trailing space, which the duplicate-entry guard of
+# scripts/release_client.sh cannot match because it anchors on the end of the line. Keep this
+# byte-identical to what markdownlint normalises to: no trailing spaces, a blank line around the heading
+# and around the list. It reaches scripts/release_client.sh VERBATIM through the environment
+# (RELEASE_NOTES_TEMPLATE below), never on a command line, so a backtick in GENERIC_RELEASE_EXTRA is never
+# command-substituted; the script turns `\n` into newlines, drops the other backslashes and ends the
+# notes in exactly one newline.
+# PRODUCTNAME is NOT a typo: the two client families spell the product differently in their RELEASE.md
+# headings (python and the js family "ONDEWO Survey", cpp/csharp/go/java/php/rust "ONDEWO SURVEY"), so
+# scripts/release_client.sh fills in the spelling the client's own newest entry uses, and its duplicate-entry
+# guard accepts either.
+GENERIC_RELEASE_NOTES=\n*****************\n\n\\\#\\\# Release ONDEWO PRODUCTNAME REPONAME Client ${ONDEWO_SURVEY_API_VERSION}\n\n\\\#\\\#\\\# ${GENERIC_RELEASE_SECTION}\n\n* Tracking API Version [${ONDEWO_SURVEY_API_VERSION}](https://github.com/ondewo/ondewo-survey-api/releases/tag/${ONDEWO_SURVEY_API_VERSION}) ( [Documentation](https://ondewo.github.io/ondewo-survey-api/) )\n${GENERIC_RELEASE_EXTRA}
+
+# One devops-accounts clone per run: reuses DEVOPS_ACCOUNT_DIR when an outer target already made one.
+#
+# The lines that start the wrapper call `make`, NOT `$(MAKE)`, on purpose: make EXECUTES every recipe line
+# that mentions $(MAKE) even under `make -n`, so `make -n release_all_clients` would clone
+# ondewo-devops-accounts for real. With a plain `make` a dry run only prints the wrapper line; dry-run the
+# inner targets (release_all_clients_after_preflight, release_client CLIENT=<x>, release) to see the steps.
+WITH_DEVOPS_ACCOUNTS=DEVOPS_ACCOUNT_GIT_URL="$(DEVOPS_ACCOUNT_GIT_URL)" scripts/with_devops_accounts.sh
+
+# $(call run_client_script,<preflight|release>,<client>)
+run_client_script=$(if $(filter $(2),$(CLIENTS)),,$(error CLIENT='$(2)' is not one of: $(CLIENTS)))$(WITH_DEVOPS_ACCOUNTS) scripts/release_client.sh $(1) $(2) "$(CLIENT_GIT_URL_PREFIX)$(2).git" "$(call CLIENT_RELEASE_MD,$(2))" "$(call CLIENT_DISPLAY_NAME,$(2))" "$(ONDEWO_SURVEY_API_VERSION)" "$(ONDEWO_PROTO_COMPILER_VERSION)"
+preflight_client release_client: export RELEASE_NOTES_TEMPLATE=$(GENERIC_RELEASE_NOTES)
+
+release_all_clients: ## Preflight EVERY client, then release them IN PARALLEL; one failing client does not abort the others
+	@$(WITH_DEVOPS_ACCOUNTS) make --no-print-directory release_all_clients_after_preflight
+
+# preflight_all_clients is a PREREQUISITE: a single failing preflight stops the run before any client
+# releases. `.NOTPARALLEL:` keeps it ahead of the recipe even under `make -j`.
+# SKIP means "already released AND verified" (release_verify, or a published GitHub release for a legacy
+# client); a half-finished earlier release is INCOMPLETE and a failure of this run FAILED - never SKIP.
+release_all_clients_after_preflight: preflight_all_clients
+	@umask 077; \
+	echo "Releasing all clients in parallel for ${ONDEWO_SURVEY_API_VERSION} ..."; \
+	rm -f .already_released_marker-* .incomplete_marker-* .client_status-*; \
 	for c in $(CLIENTS); do \
-		( if make release_$${c}_client > release_run_$${c}.log 2>&1; then echo RELEASED > .client_status-$$c; \
-		  elif [ -f .already_released_marker-$$c ]; then echo SKIP > .client_status-$$c; \
+		rm -f release_run_$$c.log; \
+		( if $(MAKE) --no-print-directory release_client CLIENT=$$c > release_run_$$c.log 2>&1; then \
+			if [ -f .already_released_marker-$$c ]; then echo SKIP > .client_status-$$c; else echo RELEASED > .client_status-$$c; fi; \
+		  elif [ -f .incomplete_marker-$$c ]; then echo INCOMPLETE > .client_status-$$c; \
 		  else echo FAILED > .client_status-$$c; fi ) & \
 	done; \
 	wait; \
@@ -198,111 +264,37 @@ release_all_clients: ## Release all clients IN PARALLEL; one failing client does
 	for c in $(CLIENTS); do \
 		s=$$(cat .client_status-$$c 2>/dev/null || echo NO_STATUS); \
 		echo "  $$c : $$s"; \
-		if [ "$$s" = FAILED ] || [ "$$s" = NO_STATUS ]; then failed=1; echo "      -> see release_run_$$c.log"; fi; \
+		case "$$s" in RELEASED|SKIP) ;; *) failed=1; echo "      -> see release_run_$$c.log";; esac; \
 	done; \
 	echo "==============================================================="; \
-	rm -f .already_released_marker-* .client_status-*; \
-	if [ "$$failed" = 1 ]; then echo "RESULT: one or more clients FAILED (the others released independently)."; exit 1; fi; \
-	echo "RESULT: all clients released or already up-to-date."
+	rm -f .already_released_marker-* .incomplete_marker-* .client_status-*; \
+	if [ "$$failed" = 1 ]; then echo "RESULT: one or more clients FAILED or are INCOMPLETE (the others released independently)."; exit 1; fi; \
+	echo "RESULT: all clients released and verified, or already released and verified."
 
-GENERIC_CLIENT?=
-RELEASEMD?=
-# The section heading is driven by GENERIC_RELEASE_SECTION so a breaking API release does not publish five
-# client majors under "Improvements". On a major bump, override it and describe the break:
-#   make release_all_clients GENERIC_RELEASE_SECTION='Breaking Changes' \
-#     GENERIC_RELEASE_EXTRA='* `<Message>` is renamed to `<NewMessage>`.\n'
-GENERIC_RELEASE_SECTION?=Improvements
-GENERIC_RELEASE_EXTRA?=
-# Emitted markdownlint-clean, and deliberately on ONE line. Every ` \n` used to leave a trailing space on
-# each generated line and a leading space on the list item, and make's line-continuation collapses
-# `\<newline><tab>` to a further space, so the block tripped MD009/MD007/MD022/MD012/MD032 in EVERY client
-# and the first pre-commit run of every release `Failed - files were modified by this hook` (10 auto-fixes
-# in the Python client, measured on a lint-clean RELEASE.md). It self-healed on the re-run, but it also
-# left the heading as `\#\# Release ... <VERSION> ` WITH a trailing space, which the release_client guard
-# below cannot match because that grep anchors on `$$` - so the duplicate-entry guard would only ever have
-# matched entries a previous markdownlint run had already stripped. Keep this byte-identical to what
-# markdownlint normalises to: no trailing spaces, a blank line around the heading and around the list.
-GENERIC_RELEASE_NOTES=\n*****************\n\n\\\#\\\# Release ONDEWO Survey REPONAME Client ${ONDEWO_SURVEY_API_VERSION}\n\n\\\#\\\#\\\# ${GENERIC_RELEASE_SECTION}\n\n* Tracking API Version [${ONDEWO_SURVEY_API_VERSION}](https://github.com/ondewo/ondewo-survey-api/releases/tag/${ONDEWO_SURVEY_API_VERSION}) ( [Documentation](https://ondewo.github.io/ondewo-survey-api/) )\n${GENERIC_RELEASE_EXTRA}
+preflight_all_clients: ## Preflight every client serially; fails if ANY client fails, and then nothing is released
+	@$(WITH_DEVOPS_ACCOUNTS) make --no-print-directory preflight_all_clients_with_devops
 
-release_client:
-	$(eval REPO_NAME:= $(shell echo ${GENERIC_CLIENT} | cut -d "-" -f 4 | cut -d '.' -f 1))
-	$(eval REPO_DIR:= $(shell echo "ondewo-survey-client-${REPO_NAME}"))
-	$(eval UPPER_REPO_NAME:= $(shell echo ${REPO_NAME} | perl -pe 's/.*/\u$$&/'))
-# Clone Repo
-	rm -rf ${REPO_DIR}
-	rm -f build_log_${REPO_NAME}.txt
+preflight_all_clients_with_devops:
+	@failed=""; \
+	for c in $(CLIENTS); do \
+		$(MAKE) --no-print-directory preflight_client CLIENT=$$c || failed="$$failed $$c"; \
+	done; \
+	rm -f .incomplete_marker-*; \
+	if [ -n "$$failed" ]; then echo "PREFLIGHT FAILED for:$$failed - nothing was released"; exit 1; fi; \
+	echo "PREFLIGHT OK for: $(CLIENTS)"
 
-	@# printf '%b', not echo: echo appends a newline of its own on top of the trailing \n, which left a
-	@# second blank line before the previous entry's separator (markdownlint MD012 used to eat it).
-	@# Read through the environment (line 1 is a bare `export`) rather than interpolating the value into
-	@# the command text: the value used to carry its own double quotes, so a backtick in
-	@# GENERIC_RELEASE_EXTRA would be command-substituted by the shell before printf ever saw it.
-	@# The final perl normalises the file to exactly ONE trailing newline: printf '%b' adds none, so a
-	@# GENERIC_RELEASE_EXTRA that does not end in \n would leave the file without a final newline, and the
-	@# insert below would then swallow the blank line before the next ***** separator (MD032).
-	@printf '%b' "$$GENERIC_RELEASE_NOTES" > temp-notes-${REPO_NAME} && perl -i -pe 's/\\//g' temp-notes-${REPO_NAME} && perl -i -pe 's/REPONAME/${UPPER_REPO_NAME}/g' temp-notes-${REPO_NAME} && perl -0777 -i -pe 's/\n*\z/\n/' temp-notes-${REPO_NAME}
-	git clone ${GENERIC_CLIENT}
-# Check if Client is already uptodate with API Version
-	@! git -C ${REPO_DIR} branch -a | grep -q ${ONDEWO_SURVEY_API_VERSION} || (echo "Already Released ${ONDEWO_SURVEY_API_VERSION} \n\n\n"  && touch .already_released_marker-${REPO_NAME} && rm -rf ${REPO_DIR} && rm -f temp-notes-${REPO_NAME} && exit 1)
+preflight_client: ## Preflight ONE client: make preflight_client CLIENT=<language>
+	@$(call run_client_script,preflight,$(CLIENT))
 
-# Change Version Number and RELEASE NOTES
-# Only insert the generated boilerplate when the client does not already document this version. A client
-# whose RELEASE.md was written by hand ahead of the release would otherwise get a SECOND
-# "Release ONDEWO Survey <Name> Client <VERSION>" heading, which buries the curated entry (the notes slice
-# takes the FIRST match) and trips markdownlint MD025/MD024 - neither of which auto-fixes, so the client's
-# own pre-commit fails the build and the release aborts. ondewo-nlu-client-angular carries two
-# byte-identical "## Release ONDEWO NLU Angular Client 3.5.0" blocks from exactly this failure.
-	cd ${REPO_DIR} && if grep -qE "^#+ Release ONDEWO Survey ${UPPER_REPO_NAME} Client ${ONDEWO_SURVEY_API_VERSION}$$" ${RELEASEMD}; then \
-		echo "${RELEASEMD} already documents ${ONDEWO_SURVEY_API_VERSION} - keeping the curated entry, not inserting the generated notes"; \
-	else \
-		perl -i -ne 'print; if(/Release History/){open my $$fh,"<","../temp-notes-${REPO_NAME}"; print while <$$fh>; close $$fh}' ${RELEASEMD}; \
-	fi
-	cd ${REPO_DIR} && head -20 ${RELEASEMD}
-	cd ${REPO_DIR} && perl -i -pe 's/^ONDEWO_SURVEY_VERSION\s*=.*/ONDEWO_SURVEY_VERSION=${ONDEWO_SURVEY_API_VERSION}/' Makefile
-	cd ${REPO_DIR} && perl -i -pe 's/^ONDEWO_PROTO_COMPILER_GIT_BRANCH\s*=.*/ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags\/${ONDEWO_PROTO_COMPILER_VERSION}/' Makefile
-	cd ${REPO_DIR} && perl -i -pe 's/^((ONDEWO_)?SURVEY_API_GIT_BRANCH)\s*=.*/$$1=tags\/${ONDEWO_SURVEY_API_VERSION}/' Makefile && head -30 Makefile
+release_client: ## Release ONE client (a contract client's release starts with release_preflight): make release_client CLIENT=<language>
+	@$(call run_client_script,release,$(CLIENT))
 
-# Build new code
-	bash -c 'set -o pipefail; make -C ${REPO_DIR} ondewo_release | tee build_log_${REPO_NAME}.txt'
-	make -C ${REPO_DIR} TEST
-# Remove everything from Release
-	sudo rm -rf ${REPO_DIR}
-	rm -f temp-notes-${REPO_NAME}
+# make release_<language>_client / make preflight_<language>_client, e.g. release_python_client
+release_%_client:
+	@$(MAKE) --no-print-directory release_client CLIENT=$*
 
-PYTHON_CLIENT="git@github.com:ondewo/ondewo-survey-client-python.git"
-
-release_python_client: ## Release Python Client
-	@echo "Start releasing Python Client"
-	make release_client GENERIC_CLIENT=${PYTHON_CLIENT} RELEASEMD="RELEASE.md"
-	@echo "End releasing Python Client \n \n \n"
-
-NODEJS_CLIENT="git@github.com:ondewo/ondewo-survey-client-nodejs.git"
-
-release_nodejs_client: ## Release NodeJs Client
-	@echo "Start releasing Nodejs Client"
-	make release_client GENERIC_CLIENT=${NODEJS_CLIENT} RELEASEMD="src/RELEASE.md"
-	@echo "End releasing Nodejs Client \n \n \n"
-
-TYPESCRIPT_CLIENT="git@github.com:ondewo/ondewo-survey-client-typescript.git"
-
-release_typescript_client: ## Release Typescript Client
-	@echo "Start releasing Typescript Client"
-	make release_client GENERIC_CLIENT=${TYPESCRIPT_CLIENT} RELEASEMD="src/RELEASE.md"
-	@echo "End releasing Typescript Client \n \n \n"
-
-ANGULAR_CLIENT="git@github.com:ondewo/ondewo-survey-client-angular.git"
-
-release_angular_client:
-	@echo "Start releasing Angular Client"
-	make release_client GENERIC_CLIENT=${ANGULAR_CLIENT} RELEASEMD="src/RELEASE.md"
-	@echo "End releasing Angular Client \n \n \n"
-
-JS_CLIENT="git@github.com:ondewo/ondewo-survey-client-js.git"
-
-release_js_client: ## Release JS Client
-	@echo "Start releasing Js Client"
-	make release_client GENERIC_CLIENT=${JS_CLIENT} RELEASEMD="src/RELEASE.md"
-	@echo "End releasing Js Client \n \n \n"
+preflight_%_client:
+	@$(MAKE) --no-print-directory preflight_client CLIENT=$*
 
 ########################################################
 #		GITHUB
@@ -323,20 +315,16 @@ release_to_github_via_docker_image: ## Release to Github via docker
 ########################################################
 #		DEVOPS-ACCOUNTS
 
-ondewo_release: spc clone_devops_accounts run_release_with_devops ## Release with credentials from devops-accounts repo
-	@rm -rf ${DEVOPS_ACCOUNT_GIT}
+# scripts/with_devops_accounts.sh --github-token clones ondewo-devops-accounts into a private `mktemp -d`,
+# reads GITHUB_GH_TOKEN (anchored to its definition line) into the ENVIRONMENT of the sub-make, deletes the
+# clone, and only then runs the release. Nothing is cloned into this checkout, the token never reaches
+# argv (`make release NAME=<value>` would put it in /proc/<pid>/cmdline), and the clone is removed on every
+# exit path, including a failure or Ctrl-C.
+ondewo_release: spc ## Release with the GitHub token from a temporary devops-accounts clone
+	@$(WITH_DEVOPS_ACCOUNTS) --github-token make release
 
-clone_devops_accounts: ## Clones devops-accounts repo
-	@if [ -d $(DEVOPS_ACCOUNT_GIT) ]; then rm -Rf $(DEVOPS_ACCOUNT_GIT); fi
-	git clone git@bitbucket.org:ondewo/${DEVOPS_ACCOUNT_GIT}.git
-
-# The token is loaded into the sub-make's ENVIRONMENT (anchored to the definition line). `make release
-# NAME=<value>` would put it on make's argv, which /proc/<pid>/cmdline shows to every user on the host.
-run_release_with_devops: ## Gets Credentials from devops-repo and runs release with them
-	@set -a \
-		&& eval "$$(grep -h -E '^GITHUB_GH_TOKEN=' ${DEVOPS_ACCOUNT_DIR}/account_github.env)" \
-		&& set +a \
-		&& $(MAKE) release
+ondewo_unrelease: ## Unrelease with the GitHub token from a temporary devops-accounts clone
+	@$(WITH_DEVOPS_ACCOUNTS) --github-token make unrelease
 
 spc: ## Checks if the Release Branch, Tag and Pypi version already exist
 	$(eval filtered_branches:= $(shell git branch --all | grep "release/${ONDEWO_SURVEY_API_VERSION}"))
@@ -361,14 +349,3 @@ unrelease_to_github_via_docker_image: ## Execute unrelease through Docker contai
 	@docker run --rm \
 		-e GITHUB_GH_TOKEN \
 		${IMAGE_UTILS_NAME} make delete_gh_release
-
-ondewo_unrelease: clone_devops_accounts run_unrelease_with_devops ## Unrelease with credentials from devops-accounts repo
-	@rm -rf ${DEVOPS_ACCOUNT_GIT}
-
-# The token is loaded into the sub-make's ENVIRONMENT (anchored to the definition line). `make unrelease
-# NAME=<value>` would put it on make's argv, which /proc/<pid>/cmdline shows to every user on the host.
-run_unrelease_with_devops: ## Gets Credentials from devops-repo and runs unrelease with them
-	@set -a \
-		&& eval "$$(grep -h -E '^GITHUB_GH_TOKEN=' ${DEVOPS_ACCOUNT_DIR}/account_github.env)" \
-		&& set +a \
-		&& $(MAKE) unrelease

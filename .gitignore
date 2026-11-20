@@ -2,6 +2,14 @@
 ondewo.github.io
 ondewo-devops-accounts
 build_log_*.txt
+release_run_*.log
+# client release (make release_<language>_client / release_all_clients): the client clones, the
+# per-run marker and status files, should a run ever leave one behind
+ondewo-survey-client-*/
+temp-notes-*
+.already_released_marker-*
+.incomplete_marker-*
+.client_status-*
 node_modules
 package.json
 package-lock.json
