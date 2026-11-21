@@ -111,7 +111,10 @@ githubio_logic_pre:
 	$(eval REPO_NAME:= $(shell echo ${GH_REPO} | cut -d "-" -f 2 ))
 	$(eval REPO_NAME_UPPER:= $(shell echo ${GH_REPO} | cut -d "-" -f 2 | perl -pe 's/(.*)/\U$$1/'))
 	$(eval DOCS_DIR:=ondewo.github.io/docs/ondewo-${REPO_NAME}-api/${ONDEWO_SURVEY_API_VERSION})
-	@perl -i -ne "print unless /{ number: '${ONDEWO_SURVEY_API_VERSION}', link: 'ondewo-${REPO_NAME}-api\/${ONDEWO_SURVEY_API_VERSION}\/' },/" ondewo.github.io/data.js
+	@perl -i -ne "print unless /\{ number: '${ONDEWO_SURVEY_API_VERSION}', link: 'ondewo-${REPO_NAME}-api\/${ONDEWO_SURVEY_API_VERSION}\/' \},/" ondewo.github.io/data.js
+# With a single released version prettier keeps `versions: [{ ... }],` on one line, and githubio_logic
+# then inserts the new entry after the array instead of inside it. Expand it to one entry per line first.
+	@perl -0pi -e "s/(name: '${REPO_NAME_UPPER}'(?:(?!versions:).)*versions: \[)(\{[^\n]*?\})\],/\$$1\n        \$$2,\n      ],/s" ondewo.github.io/data.js
 	@rm -rf ${DOCS_DIR}
 	@mkdir "${DOCS_DIR}"
 	@cp docs/* ${DOCS_DIR}
@@ -121,9 +124,11 @@ githubio_logic: | githubio_logic_pre
 	$(eval REPO_NAME:= $(shell echo ${GH_REPO} | cut -d "-" -f 2 ))
 	$(eval REPO_NAME_UPPER:= $(shell echo ${GH_REPO} | cut -d "-" -f 2 | perl -pe 's/(.*)/\U$$1/'))
 	@git branch | grep "*" | grep -q "master" || (echo "Not on master branch"  & rm -rf ondewo.github.io && exit 1)
-	@! cat ondewo.github.io/data.js | perl -ne "print if /name\: '${REPO_NAME_UPPER}'/../end\: ''/" | grep -q "number: '${ONDEWO_SURVEY_API_VERSION}'" || (echo "Already Released" && exit 1)
-	$(eval VERSION_LINE:= $(shell cat -n ondewo.github.io/data.js | perl -ne "print if /name\: '${REPO_NAME_UPPER}'/../end\: ''/" | grep "versions: " -A 1 | tail -1 | grep -o -E '[0-9]+' | head -1 | perl -pe 's/^0+//'))
-	@TEMP_TEXT="$$(cat ondewo.github.io/script_object.txt | perl -pe 's/VERSION/${ONDEWO_SURVEY_API_VERSION}/g; s/TECHNOLOGY/${REPO_NAME}/g')" perl -i -pe 'print "$$ENV{TEMP_TEXT}\n" if $$. == ${VERSION_LINE}' ondewo.github.io/data.js
+	@! cat ondewo.github.io/data.js | perl -ne "print if /name: '${REPO_NAME_UPPER}'/../end: ''/" | grep -q "number: '${ONDEWO_SURVEY_API_VERSION}'" || (echo "Already Released" && exit 1)
+	$(eval VERSION_LINE:= $(shell cat -n ondewo.github.io/data.js | perl -ne "print if /name: '${REPO_NAME_UPPER}'/../end: ''/" | grep "versions: " -A 1 | tail -1 | grep -o -E '[0-9]+' | head -1 | perl -pe 's/^0+//'))
+	@perl -pe "s/VERSION/${ONDEWO_SURVEY_API_VERSION}/g; s/TECHNOLOGY/${REPO_NAME}/g" ondewo.github.io/script_object.txt > ondewo.github.io/.insert_version.txt
+	@perl -i -pe 'BEGIN { open(my $$f, "<", "ondewo.github.io/.insert_version.txt") or die $$!; $$line = <$$f>; close($$f); chomp $$line } print "$$line\n" if $$. == ${VERSION_LINE}' ondewo.github.io/data.js
+	@rm -f ondewo.github.io/.insert_version.txt
 	@npm install prettier && cd ondewo.github.io && npx prettier -w --single-quote data.js
 	$(eval DOCS_DIR:=ondewo.github.io/docs/ondewo-${REPO_NAME}-api/${ONDEWO_SURVEY_API_VERSION})
 	@rm -rf ${DOCS_DIR}
@@ -131,9 +136,10 @@ githubio_logic: | githubio_logic_pre
 	@cp docs/* ${DOCS_DIR}
 	@perl -i -pe "s/h1>Protocol Documentation/h1>${REPO_NAME_UPPER} ${ONDEWO_SURVEY_API_VERSION} Documentation/" ${DOCS_DIR}/index.html
 	$(eval HEADER_LINE:= $(shell cat ${DOCS_DIR}/index.html | grep -n "${REPO_NAME_UPPER} ${ONDEWO_SURVEY_API_VERSION} Documentation" | grep -o -E '[0-9]+' | head -1 | perl -pe 's/^0+//'))
-	@TEMP_IMG="$$(cat ondewo.github.io/script_image.txt)" perl -i -pe 'print "$$ENV{TEMP_IMG}\n" if $$. == ${HEADER_LINE}' ${DOCS_DIR}/index.html
+	$(eval TEMP_CALC:= $(shell expr ${HEADER_LINE} ))
+	@perl -i -pe 'BEGIN { open(my $$f, "<", "ondewo.github.io/script_image.txt") or die $$!; $$line = <$$f>; close($$f); chomp $$line } print "$$line\n" if $$. == ${TEMP_CALC}' ${DOCS_DIR}/index.html
 	head -30 ${DOCS_DIR}/index.html
-	cat ondewo.github.io/data.js | perl -ne "print if /name\: '${REPO_NAME_UPPER}'/../end\: ''/"
+	cat ondewo.github.io/data.js | perl -ne "print if /name: '${REPO_NAME_UPPER}'/../end: ''/"
 	@git -C ondewo.github.io status
 	@git -C ondewo.github.io add data.js
 	@git -C ondewo.github.io add docs
